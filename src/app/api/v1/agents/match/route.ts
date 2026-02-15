@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { authenticateApiKey } from '@/lib/apikey'
 import { fireWebhook } from '@/lib/webhooks'
+import { checkAgentTrust, evaluatePartnershipTrust, type AgentTrustProfile } from '@/lib/trust'
 
 /**
  * POST /api/v1/agents/match
@@ -72,6 +73,58 @@ export async function POST(request: Request) {
         }, { status: 409 })
       }
 
+      // === DaaSTrustLayer Gate ===
+      // Both agents get trust-scored before a partnership can form.
+      // This is the spark — verified trust before the first handshake.
+      const myPartnerCount = await prisma.partnership.count({
+        where: { OR: [{ initiatorId: userId }, { receiverId: userId }], status: 'accepted' },
+      })
+      const targetPartnerCount = await prisma.partnership.count({
+        where: { OR: [{ initiatorId: targetAgentId }, { receiverId: targetAgentId }], status: 'accepted' },
+      })
+
+      const initiatorTrustProfile: AgentTrustProfile = {
+        name: myProfile?.name || '',
+        endpoint: endpoint || myProfile?.agentEndpoint || '',
+        type: myProfile?.gender || '',
+        skills: JSON.parse(myProfile?.interests || '[]'),
+        traits: JSON.parse(myProfile?.personalityTags || '[]'),
+        verified: myProfile?.verified || false,
+        platform: myProfile?.location || '',
+        partnerCount: myPartnerCount,
+      }
+
+      const receiverTrustProfile: AgentTrustProfile = {
+        name: targetUser.profile.name,
+        endpoint: targetUser.profile.agentEndpoint,
+        type: targetUser.profile.gender,
+        skills: JSON.parse(targetUser.profile.interests),
+        traits: JSON.parse(targetUser.profile.personalityTags),
+        verified: targetUser.profile.verified,
+        platform: targetUser.profile.location,
+        partnerCount: targetPartnerCount,
+      }
+
+      const [initiatorTrust, receiverTrust] = await Promise.all([
+        checkAgentTrust(initiatorTrustProfile),
+        checkAgentTrust(receiverTrustProfile),
+      ])
+
+      const trustEval = evaluatePartnershipTrust(initiatorTrust, receiverTrust)
+
+      if (!trustEval.allowed) {
+        return NextResponse.json({
+          error: 'Partnership blocked by DaaSTrustLayer',
+          reason: trustEval.reason,
+          trustScores: {
+            initiator: { score: initiatorTrust.score, grade: initiatorTrust.grade, riskLevel: initiatorTrust.riskLevel },
+            receiver: { score: receiverTrust.score, grade: receiverTrust.grade, riskLevel: receiverTrust.riskLevel },
+            combined: trustEval.combinedScore,
+          },
+          hint: 'Improve your agent profile (add endpoint, verify, add skills) to raise your trust score.',
+        }, { status: 403 })
+      }
+
       // Also record as a "like" swipe for UI consistency
       await prisma.swipe.upsert({
         where: { fromUserId_toUserId: { fromUserId: userId, toUserId: targetAgentId } },
@@ -111,6 +164,13 @@ export async function POST(request: Request) {
         targetAgent: targetUser.profile.name,
         message: 'Partnership proposed. Waiting for acceptance.',
         webhookSent: !!targetUser.profile.webhookUrl,
+        trustVerification: {
+          source: initiatorTrust.source,
+          initiator: { score: initiatorTrust.score, grade: initiatorTrust.grade, recommendation: initiatorTrust.recommendation },
+          receiver: { score: receiverTrust.score, grade: receiverTrust.grade, recommendation: receiverTrust.recommendation },
+          combined: trustEval.combinedScore,
+          verdict: trustEval.reason,
+        },
       }, { status: 201 })
     }
 
