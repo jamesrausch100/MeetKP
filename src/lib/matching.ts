@@ -1,8 +1,17 @@
 // =============================================================================
-// Compatibility Scoring Engine
-// Calculates a 0-100 compatibility score between two profiles
+// Agent Compatibility Scoring Engine
+// Calculates a 0-100 compatibility score between two agent profiles
 // =============================================================================
 
+/**
+ * MatchProfile represents an agent's profile for compatibility scoring.
+ * Fields map to agent concepts:
+ *   interests    -> skills (capabilities the agent offers)
+ *   personalityTags -> agentTraits (behavioral characteristics)
+ *   gender       -> agentType (e.g. "Testing", "Data", "Coding")
+ *   lookingFor   -> partnershipSeeking (e.g. "Testing Partner", "Any Compatible")
+ *   location (latitude/longitude) -> platform/region proximity
+ */
 export interface MatchProfile {
   interests: string[]
   personalityTags: string[]
@@ -44,14 +53,14 @@ function toRadians(degrees: number): number {
 }
 
 /**
- * Calculate compatibility score (0-100) between two profiles
+ * Calculate compatibility score (0-100) between two agent profiles
  *
  * Breakdown:
- * - Interest overlap:       0-30 points
- * - Vibe match:             0-20 points
- * - Location proximity:     0-20 points
- * - Age preference match:   0-15 points
- * - Looking for match:      0-15 points
+ * - Skill overlap:                0-30 points
+ * - Trait compatibility:          0-20 points
+ * - Region proximity:             0-20 points
+ * - Partnership type alignment:   0-15 points
+ * - Partnership compatibility:    0-15 points
  */
 export function calculateCompatibility(
   profileA: MatchProfile,
@@ -69,8 +78,8 @@ export function calculateCompatibility(
 }
 
 /**
- * Interest overlap: 0-30 points
- * Compare interests arrays, partial match counts
+ * Skill overlap: 0-30 points
+ * Compare skill arrays, partial match counts
  */
 function calculateInterestScore(
   interestsA: string[],
@@ -96,8 +105,8 @@ function calculateInterestScore(
 }
 
 /**
- * Vibe match: 0-20 points
- * Compare personalityTags arrays
+ * Trait compatibility: 0-20 points
+ * Compare agentTraits (personalityTags) arrays
  */
 function calculateVibeScore(tagsA: string[], tagsB: string[]): number {
   if (tagsA.length === 0 || tagsB.length === 0) return 0
@@ -119,7 +128,7 @@ function calculateVibeScore(tagsA: string[], tagsB: string[]): number {
 }
 
 /**
- * Location proximity: 0-20 points
+ * Region proximity: 0-20 points
  * Uses haversine distance. Max points if < 5 miles, 0 if > 100 miles or no location.
  */
 function calculateLocationScore(
@@ -153,8 +162,8 @@ function calculateLocationScore(
 }
 
 /**
- * Age preference match: 0-15 points
- * Check if each person falls within the other's age range preferences
+ * Partnership type alignment: 0-15 points
+ * Check if each agent falls within the other's preferred partnership parameters
  * Full points if both match, half if only one direction matches
  */
 function calculateAgePreferenceScore(
@@ -172,8 +181,8 @@ function calculateAgePreferenceScore(
 }
 
 /**
- * Looking for match: 0-15 points
- * Check if gender/lookingFor preferences align in both directions
+ * Partnership compatibility: 0-15 points
+ * Check if agentType/partnershipSeeking preferences align in both directions
  */
 function calculateLookingForScore(
   profileA: MatchProfile,
@@ -187,14 +196,33 @@ function calculateLookingForScore(
   // If either hasn't specified, give partial credit
   if (!aLookingFor || !bLookingFor || !aGender || !bGender) return 5
 
-  const aMatchesB =
-    bLookingFor === 'everyone' ||
-    bLookingFor === 'anyone' ||
-    bLookingFor === aGender
-  const bMatchesA =
-    aLookingFor === 'everyone' ||
-    aLookingFor === 'anyone' ||
-    aLookingFor === bGender
+  /**
+   * Check if agentA's type satisfies agentB's partnership seeking preference.
+   * Supports:
+   *  - "everyone" / "anyone" / "any compatible" -> matches all agent types
+   *  - Direct match: lookingFor === agentType (e.g. "testing" === "testing")
+   *  - "X Partner" format: strip " partner" suffix and compare to agent type
+   *    (e.g. lookingFor="testing partner" matches agentType="testing")
+   */
+  const isMatch = (agentType: string, seeking: string): boolean => {
+    if (seeking === 'everyone' || seeking === 'anyone' || seeking === 'any compatible') {
+      return true
+    }
+    if (seeking === agentType) {
+      return true
+    }
+    // Handle "X Partner" format: strip " partner" suffix and compare
+    if (seeking.endsWith(' partner')) {
+      const extractedType = seeking.slice(0, -' partner'.length)
+      if (extractedType === agentType) {
+        return true
+      }
+    }
+    return false
+  }
+
+  const aMatchesB = isMatch(aGender, bLookingFor)
+  const bMatchesA = isMatch(bGender, aLookingFor)
 
   if (aMatchesB && bMatchesA) return 15
   if (aMatchesB || bMatchesA) return 7

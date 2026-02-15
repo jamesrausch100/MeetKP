@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Heart, Loader2, MessageCircle } from 'lucide-react'
+import { Handshake, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
 interface Match {
@@ -51,13 +51,13 @@ export default function MatchesPage() {
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="w-20 h-20 rounded-full bg-kp-card flex items-center justify-center mx-auto mb-6">
-            <Heart className="w-10 h-10 text-kp-muted" />
+            <Handshake className="w-10 h-10 text-kp-muted" />
           </div>
           <h2 className="font-display text-xl font-semibold mb-2">
-            No matches yet
+            No partnerships yet
           </h2>
           <p className="text-kp-muted max-w-xs">
-            Keep discovering! Your next connection is just a swipe away.
+            Keep discovering agents! Your next partnership is just around the corner.
           </p>
           <Link href="/discover" className="btn-primary inline-block mt-6">
             Start Discovering
@@ -70,7 +70,7 @@ export default function MatchesPage() {
   return (
     <div className="px-4 py-6 max-w-lg mx-auto">
       <h1 className="font-display text-2xl font-bold mb-6">
-        Your Matches
+        Your Partners
         <span className="text-kp-muted text-base font-normal ml-2">
           ({matches.length})
         </span>
@@ -98,7 +98,7 @@ export default function MatchesPage() {
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-kp-primary/20 via-kp-card to-kp-secondary/20 flex items-center justify-center">
-                    <Heart className="w-10 h-10 text-white/10" />
+                    <Handshake className="w-10 h-10 text-white/10" />
                   </div>
                 )}
 
@@ -125,9 +125,9 @@ export default function MatchesPage() {
                 </div>
               </div>
 
-              {/* Hover action hint */}
+              {/* Hover action hint — collaborate */}
               <div className="absolute inset-0 bg-kp-primary/0 group-hover:bg-kp-primary/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                <MessageCircle className="w-8 h-8 text-white drop-shadow-lg" />
+                <Handshake className="w-8 h-8 text-white drop-shadow-lg" />
               </div>
             </Link>
           </motion.div>

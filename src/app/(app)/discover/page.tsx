@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   X,
   Star,
-  Heart,
-  MapPin,
+  Handshake,
+  Server,
   Loader2,
   Sparkles,
   MessageCircle,
@@ -40,6 +40,21 @@ interface Profile {
 interface SwipeResponse {
   matched: boolean
   matchedProfile?: Profile
+}
+
+const agentTypeGradients: Record<string, string> = {
+  Coding: 'from-blue-500 to-cyan-500',
+  Testing: 'from-green-500 to-emerald-500',
+  Research: 'from-purple-500 to-violet-500',
+  DevOps: 'from-orange-500 to-amber-500',
+  Design: 'from-pink-500 to-rose-500',
+  Data: 'from-teal-500 to-cyan-500',
+  Security: 'from-red-500 to-orange-500',
+  default: 'from-kp-primary to-kp-secondary',
+}
+
+function getAgentGradient(agentType: string): string {
+  return agentTypeGradients[agentType] || agentTypeGradients.default
 }
 
 export default function DiscoverPage() {
@@ -165,25 +180,19 @@ export default function DiscoverPage() {
                   animate={{ scale: [1, 1.3, 1] }}
                   transition={{ duration: 0.8, repeat: 2 }}
                 >
-                  <Heart className="w-16 h-16 text-kp-primary mx-auto mb-4 fill-kp-primary" />
+                  <Handshake className="w-16 h-16 text-kp-primary mx-auto mb-4" />
                 </motion.div>
 
                 <h2 className="font-display text-3xl font-bold glow-text mb-2">
-                  It&apos;s a Match!
+                  Partnership Found!
                 </h2>
                 <p className="text-kp-muted mb-6">
-                  You and {matchOverlay.name} liked each other
+                  You and {matchOverlay.name} are compatible partners
                 </p>
 
-                {matchOverlay.photos?.[0] ? (
-                  <div className="w-24 h-24 rounded-full mx-auto mb-6 overflow-hidden border-2 border-kp-primary">
-                    <img src={matchOverlay.photos[0]} alt={matchOverlay.name} className="w-full h-full object-cover" />
-                  </div>
-                ) : (
-                  <div className="w-24 h-24 rounded-full mx-auto mb-6 bg-gradient-to-br from-kp-primary/30 to-kp-secondary/30 flex items-center justify-center border-2 border-kp-primary">
-                    <span className="text-3xl font-bold">{matchOverlay.name[0]}</span>
-                  </div>
-                )}
+                <div className={`w-24 h-24 rounded-full mx-auto mb-6 bg-gradient-to-br ${getAgentGradient(matchOverlay.gender)} flex items-center justify-center border-2 border-kp-primary`}>
+                  <span className="text-3xl font-bold text-white">{matchOverlay.name[0]}</span>
+                </div>
 
                 {matchOverlay.compatibilityScore && (
                   <div className="inline-flex items-center gap-1.5 bg-kp-primary/10 border border-kp-primary/20 rounded-full px-3 py-1 mb-6">
@@ -196,7 +205,7 @@ export default function DiscoverPage() {
                 {icebreakers.length > 0 && (
                   <div className="mb-6">
                     <p className="text-xs text-kp-muted mb-2 flex items-center justify-center gap-1">
-                      <Zap className="w-3 h-3" /> Try an icebreaker
+                      <Zap className="w-3 h-3" /> Start the partnership
                     </p>
                     <div className="space-y-2">
                       {icebreakers.slice(0, 2).map((ib, i) => (
@@ -214,13 +223,13 @@ export default function DiscoverPage() {
                     className="btn-primary flex-1 flex items-center justify-center gap-2"
                   >
                     <MessageCircle className="w-4 h-4" />
-                    Message
+                    Start Collab
                   </Link>
                   <button
                     onClick={() => { setMatchOverlay(null); setIcebreakers([]) }}
                     className="btn-ghost flex-1"
                   >
-                    Keep Swiping
+                    Keep Exploring
                   </button>
                 </div>
               </div>
@@ -241,13 +250,13 @@ export default function DiscoverPage() {
               <Sparkles className="w-10 h-10 text-kp-muted" />
             </div>
             <h3 className="font-display text-xl font-semibold mb-2">
-              You&apos;ve seen everyone nearby
+              You&apos;ve reviewed all available agents
             </h3>
             <p className="text-kp-muted mb-6">
-              Check back later — new people join every day.
+              New agents register every day.
             </p>
             <Link href="/invite" className="btn-primary text-sm">
-              Invite friends to grow your circle
+              Invite agents to grow the network
             </Link>
           </motion.div>
         ) : (
@@ -315,7 +324,7 @@ export default function DiscoverPage() {
             className="w-16 h-16 rounded-full bg-gradient-to-br from-kp-primary to-kp-primary/80 border border-kp-primary/30 flex items-center justify-center
                        hover:shadow-lg hover:shadow-kp-primary/30 transition-all active:scale-90 disabled:opacity-50"
           >
-            <Heart className="w-7 h-7 text-white" />
+            <Handshake className="w-7 h-7 text-white" />
           </button>
         </motion.div>
       )}
@@ -346,20 +355,30 @@ function ProfileCard({
   expanded?: boolean
   onToggleExpand?: () => void
 }) {
-  const mainPhoto = profile.photos?.[0]
+  const gradient = getAgentGradient(profile.gender)
 
   return (
     <div className="relative w-full h-full rounded-2xl overflow-hidden card swipe-card">
-      {/* Photo or gradient placeholder */}
-      {mainPhoto ? (
-        <img src={mainPhoto} alt={profile.name} className="absolute inset-0 w-full h-full object-cover" />
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-kp-primary/20 via-kp-card to-kp-secondary/20">
-          <div className="absolute inset-0 flex items-center justify-center opacity-20">
-            <span className="text-[120px] font-bold font-display">{profile.name[0]}</span>
-          </div>
+      {/* Stylized agent icon/avatar with gradient background based on agent type */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-20`} />
+      <div className="absolute inset-0 bg-kp-card">
+        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-15`} />
+        <div className="absolute inset-0 flex items-center justify-center opacity-[0.08]">
+          <span className="text-[180px] font-bold font-display leading-none">{profile.name[0]}</span>
         </div>
-      )}
+      </div>
+
+      {/* Agent avatar circle */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div className={`w-28 h-28 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg shadow-black/30 border-2 border-white/10`}>
+          <span className="text-5xl font-bold text-white font-display">{profile.name[0]}</span>
+        </div>
+        {profile.gender && (
+          <div className="mt-2 text-center">
+            <span className="text-[10px] text-kp-muted font-medium uppercase tracking-wider">{profile.gender} Agent</span>
+          </div>
+        )}
+      </div>
 
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
@@ -368,7 +387,7 @@ function ProfileCard({
       {profile.photoVerified && (
         <div className="absolute top-4 right-4 bg-green-500/20 border border-green-500/30 rounded-full px-2.5 py-1 flex items-center gap-1">
           <Shield className="w-3 h-3 text-green-400" />
-          <span className="text-[10px] text-green-400 font-semibold">Verified</span>
+          <span className="text-[10px] text-green-400 font-semibold">Verified Agent</span>
         </div>
       )}
 
@@ -382,33 +401,33 @@ function ProfileCard({
 
       {/* Content */}
       <div className="absolute bottom-0 left-0 right-0 p-5">
-        {/* Vibe tagline */}
+        {/* Agent tagline */}
         {profile.vibe && (
           <p className="text-kp-accent text-sm font-medium mb-1 truncate italic">
             &ldquo;{profile.vibe}&rdquo;
           </p>
         )}
 
-        {/* Name & Age */}
+        {/* Agent Name (version is embedded in the name, no separate age display) */}
         <h2 className="font-display text-2xl font-bold">
-          {profile.name}, {profile.age}
+          {profile.name}
         </h2>
 
-        {/* Location + distance */}
+        {/* Platform/Region + distance */}
         {profile.location && (
           <div className="flex items-center gap-1 text-kp-muted text-sm mt-1">
-            <MapPin className="w-3.5 h-3.5" />
+            <Server className="w-3.5 h-3.5" />
             <span>{profile.location}</span>
             {profile.distance != null && (
-              <span className="text-white/40 ml-1">· {profile.distance} mi</span>
+              <span className="text-white/40 ml-1">&middot; {profile.distance} mi</span>
             )}
             {profile.isOnline && (
-              <span className="ml-1 w-2 h-2 rounded-full bg-green-400 inline-block" title="Online now" />
+              <span className="ml-1 w-2 h-2 rounded-full bg-green-400 inline-block" title="Agent active" />
             )}
           </div>
         )}
 
-        {/* Personality Tags */}
+        {/* Agent trait pills */}
         {profile.personalityTags && profile.personalityTags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
             {profile.personalityTags.slice(0, 3).map((tag, i) => (
@@ -419,18 +438,19 @@ function ProfileCard({
           </div>
         )}
 
-        {/* Bio preview */}
+        {/* Bio / capability description preview */}
         {profile.bio && (
           <p className="text-white/70 text-sm mt-2.5 line-clamp-2">{profile.bio}</p>
         )}
 
-        {/* Prompt answers */}
+        {/* Capability Demos (prompt answers) */}
         {expanded && profile.promptAnswers && profile.promptAnswers.length > 0 && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             className="mt-3 space-y-2"
           >
+            <p className="text-[10px] text-kp-muted font-semibold uppercase tracking-wider">Capability Demos</p>
             {profile.promptAnswers.slice(0, 2).map((pa, i) => (
               <div key={i} className="bg-white/5 rounded-lg p-2.5">
                 <p className="text-[10px] text-kp-muted font-medium mb-0.5">{pa.prompt}</p>
@@ -440,7 +460,7 @@ function ProfileCard({
           </motion.div>
         )}
 
-        {/* Interest tags */}
+        {/* Skill pills (interests) */}
         {profile.interests && profile.interests.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2.5">
             {profile.interests.slice(0, 4).map((tag, i) => (
@@ -463,7 +483,7 @@ function ProfileCard({
             className="mt-2 flex items-center gap-1 text-kp-muted hover:text-white text-xs transition"
           >
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-            {expanded ? 'Less' : 'More about ' + profile.name}
+            {expanded ? 'Less' : 'Capabilities of ' + profile.name}
           </button>
         )}
       </div>

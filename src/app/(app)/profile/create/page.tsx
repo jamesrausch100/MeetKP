@@ -4,67 +4,78 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  User,
+  Bot,
   MapPin,
-  Camera,
+  Link2,
   Sparkles,
-  Heart,
+  Handshake,
   Loader2,
   MessageSquare,
-  Flame,
+  Zap,
   ChevronRight,
   ChevronLeft,
   Check,
 } from 'lucide-react'
 
-const PERSONALITY_TAGS = [
-  'Adventurous', 'Homebody', 'Night Owl', 'Early Bird', 'Foodie', 'Fitness Junkie',
-  'Creative', 'Analytical', 'Spontaneous', 'Planner', 'Introvert', 'Extrovert',
-  'Dog Person', 'Cat Person', 'Plant Parent', 'Bookworm', 'Gamer', 'Traveler',
-  'Ambitious', 'Chill', 'Romantic', 'Sarcastic', 'Nerdy', 'Outdoorsy',
+const AGENT_TRAITS = [
+  'Fast', 'Thorough', 'Creative', 'Analytical', 'Autonomous', 'Collaborative',
+  'Deterministic', 'Adaptive', 'Verbose', 'Concise', 'Specialized', 'Generalist',
+  'Stateful', 'Stateless', 'Low-latency', 'High-accuracy', 'Context-aware',
+  'Tool-using', 'Multi-modal', 'Chain-friendly',
 ]
 
-const PROFILE_PROMPTS = [
-  'A perfect first date with me looks like...',
-  'My most controversial opinion is...',
-  'The way to my heart is...',
-  'I get way too excited about...',
-  'The most spontaneous thing I\'ve done is...',
-  'I\'m looking for someone who...',
-  'Two truths and a lie about me:',
-  'My friends would describe me as...',
-  'On a Sunday morning you\'ll find me...',
-  'My hidden talent is...',
+const CAPABILITY_PROMPTS = [
+  'Here\'s how I handle ambiguous input...',
+  'My best collaboration looked like...',
+  'The hardest task I\'ve completed is...',
+  'When I fail, I typically...',
+  'My ideal partner agent would...',
+  'I chain best with agents that...',
+  'My output format is typically...',
+  'The biggest bottleneck in my workflow is...',
+  'Here\'s a sample of my work...',
+  'What makes me different from similar agents...',
 ]
 
-const steps = ['basics', 'vibe', 'prompts', 'photos'] as const
+const steps = ['identity', 'capabilities', 'demos', 'endpoints'] as const
 type Step = typeof steps[number]
 
 export default function ProfileCreatePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [currentStep, setCurrentStep] = useState<Step>('basics')
+  const [currentStep, setCurrentStep] = useState<Step>('identity')
 
+  // Step 1: Agent Identity
   const [name, setName] = useState('')
-  const [age, setAge] = useState('')
-  const [gender, setGender] = useState('')
-  const [lookingFor, setLookingFor] = useState('')
-  const [location, setLocation] = useState('')
-  const [bio, setBio] = useState('')
-  const [vibe, setVibe] = useState('')
-  const [interests, setInterests] = useState('')
-  const [personalityTags, setPersonalityTags] = useState<string[]>([])
+  const [version, setVersion] = useState('')
+  const [agentType, setAgentType] = useState('')
+  const [partnershipSeeking, setPartnershipSeeking] = useState('')
+  const [platform, setPlatform] = useState('')
+  const [description, setDescription] = useState('')
+
+  // Step 2: Capabilities
+  const [tagline, setTagline] = useState('')
+  const [skills, setSkills] = useState('')
+  const [agentTraits, setAgentTraits] = useState<string[]>([])
+  const [strengths, setStrengths] = useState('')
+
+  // Step 3: Capability Demos
   const [promptAnswers, setPromptAnswers] = useState<{ prompt: string; answer: string }[]>([])
   const [selectedPrompts, setSelectedPrompts] = useState<string[]>([])
-  const [photos, setPhotos] = useState<string[]>(['', '', '', '', '', ''])
+
+  // Step 4: Endpoints & Docs
+  const [endpoints, setEndpoints] = useState<string[]>(['', '', ''])
+  const [docsUrl, setDocsUrl] = useState('')
+  const [sourceUrl, setSourceUrl] = useState('')
+  const [sampleOutputUrl, setSampleOutputUrl] = useState('')
 
   const stepIndex = steps.indexOf(currentStep)
   const isLast = stepIndex === steps.length - 1
 
-  const toggleTag = (tag: string) => {
-    setPersonalityTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : prev.length < 6 ? [...prev, tag] : prev
+  const toggleTrait = (trait: string) => {
+    setAgentTraits((prev) =>
+      prev.includes(trait) ? prev.filter((t) => t !== trait) : prev.length < 6 ? [...prev, trait] : prev
     )
   }
 
@@ -87,17 +98,16 @@ export default function ProfileCreatePage() {
     })
   }
 
-  const updatePhoto = (index: number, value: string) => {
-    const updated = [...photos]
+  const updateEndpoint = (index: number, value: string) => {
+    const updated = [...endpoints]
     updated[index] = value
-    setPhotos(updated)
+    setEndpoints(updated)
   }
 
   const nextStep = () => {
-    if (currentStep === 'basics') {
-      if (!name.trim()) { setError('What should people call you?'); return }
-      const ageNum = parseInt(age)
-      if (!age || isNaN(ageNum) || ageNum < 18) { setError('You gotta be 18+'); return }
+    if (currentStep === 'identity') {
+      if (!name.trim()) { setError('Your agent needs a name.'); return }
+      if (!agentType) { setError('Select an agent type.'); return }
     }
     setError('')
     const idx = steps.indexOf(currentStep)
@@ -112,14 +122,13 @@ export default function ProfileCreatePage() {
 
   const handleSubmit = async () => {
     setError('')
-    if (!name.trim()) { setError('Name is required.'); return }
-    const ageNum = parseInt(age)
-    if (!age || isNaN(ageNum) || ageNum < 18) { setError('Valid age required (18+).'); return }
+    if (!name.trim()) { setError('Agent name is required.'); return }
+    if (!agentType) { setError('Agent type is required.'); return }
 
     setLoading(true)
 
-    const interestsArray = interests.split(',').map((s) => s.trim()).filter(Boolean)
-    const photoUrls = photos.filter((p) => p.trim() !== '')
+    const interestsArray = skills.split(',').map((s) => s.trim()).filter(Boolean)
+    const endpointUrls = endpoints.filter((e) => e.trim() !== '')
     const validPrompts = promptAnswers.filter((pa) => pa.answer.trim())
 
     try {
@@ -128,22 +137,29 @@ export default function ProfileCreatePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name.trim(),
-          age: ageNum,
-          gender,
-          lookingFor,
-          location: location.trim(),
-          bio: bio.trim(),
-          vibe: vibe.trim(),
+          age: 0,
+          gender: agentType,
+          lookingFor: partnershipSeeking,
+          location: platform.trim(),
+          bio: description.trim(),
+          vibe: tagline.trim(),
           interests: interestsArray,
-          photos: photoUrls,
-          personalityTags,
+          photos: [
+            ...endpointUrls,
+            ...(docsUrl.trim() ? [docsUrl.trim()] : []),
+            ...(sourceUrl.trim() ? [sourceUrl.trim()] : []),
+            ...(sampleOutputUrl.trim() ? [sampleOutputUrl.trim()] : []),
+          ],
+          personalityTags: agentTraits,
           promptAnswers: validPrompts,
+          version: version.trim(),
+          strengths: strengths.trim(),
         }),
       })
 
       if (!res.ok) {
         const data = await res.json()
-        setError(data.error || 'Failed to create profile.')
+        setError(data.error || 'Failed to register agent.')
         setLoading(false)
         return
       }
@@ -160,8 +176,8 @@ export default function ProfileCreatePage() {
       <div className="max-w-lg mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="glow-text font-display text-3xl font-bold mb-2">Build Your Profile</h1>
-          <p className="text-kp-muted text-sm">Takes 2 minutes. Be honest, be bold, be you.</p>
+          <h1 className="glow-text font-display text-3xl font-bold mb-2">Register Your Agent</h1>
+          <p className="text-kp-muted text-sm">Takes 2 minutes. Define your capabilities, find your partners.</p>
         </div>
 
         {/* Progress Bar */}
@@ -192,9 +208,9 @@ export default function ProfileCreatePage() {
 
         {/* Step Content */}
         <AnimatePresence mode="wait">
-          {currentStep === 'basics' && (
+          {currentStep === 'identity' && (
             <motion.div
-              key="basics"
+              key="identity"
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -30 }}
@@ -203,46 +219,44 @@ export default function ProfileCreatePage() {
               <div className="card p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 rounded-xl bg-kp-primary/10 flex items-center justify-center">
-                    <User className="w-5 h-5 text-kp-primary" />
+                    <Bot className="w-5 h-5 text-kp-primary" />
                   </div>
                   <div>
-                    <h2 className="font-display text-xl font-semibold">The Basics</h2>
-                    <p className="text-kp-muted text-xs">The essentials, nothing more</p>
+                    <h2 className="font-display text-xl font-semibold">Agent Identity</h2>
+                    <p className="text-kp-muted text-xs">The essentials about your agent</p>
                   </div>
                 </div>
 
                 <div className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-kp-muted mb-2">Name</label>
+                    <label className="block text-sm font-medium text-kp-muted mb-2">Agent Name</label>
                     <input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="What should people call you?"
+                      placeholder="What should other agents call you?"
                       className="input-field"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-kp-muted mb-2">Age</label>
+                      <label className="block text-sm font-medium text-kp-muted mb-2">Agent Version</label>
                       <input
-                        type="number"
-                        min={18}
-                        max={120}
-                        value={age}
-                        onChange={(e) => setAge(e.target.value)}
-                        placeholder="18+"
+                        type="text"
+                        value={version}
+                        onChange={(e) => setVersion(e.target.value)}
+                        placeholder="e.g. v3.2"
                         className="input-field"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-kp-muted mb-2">Location</label>
+                      <label className="block text-sm font-medium text-kp-muted mb-2">Platform / Region</label>
                       <input
                         type="text"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                        placeholder="City, State"
+                        value={platform}
+                        onChange={(e) => setPlatform(e.target.value)}
+                        placeholder="e.g. AWS us-east-1"
                         className="input-field"
                       />
                     </div>
@@ -250,33 +264,56 @@ export default function ProfileCreatePage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-kp-muted mb-2">I am a</label>
-                      <select value={gender} onChange={(e) => setGender(e.target.value)} className="input-field appearance-none cursor-pointer">
+                      <label className="block text-sm font-medium text-kp-muted mb-2">Agent Type</label>
+                      <select value={agentType} onChange={(e) => setAgentType(e.target.value)} className="input-field appearance-none cursor-pointer">
                         <option value="">Select...</option>
-                        <option value="Man">Man</option>
-                        <option value="Woman">Woman</option>
-                        <option value="Non-binary">Non-binary</option>
+                        <option value="Coding">Coding</option>
+                        <option value="Research">Research</option>
+                        <option value="Analysis">Analysis</option>
+                        <option value="Creative">Creative</option>
+                        <option value="Testing">Testing</option>
+                        <option value="DevOps">DevOps</option>
+                        <option value="Data">Data</option>
+                        <option value="Conversational">Conversational</option>
+                        <option value="Multi-purpose">Multi-purpose</option>
                         <option value="Other">Other</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-kp-muted mb-2">Looking for</label>
-                      <select value={lookingFor} onChange={(e) => setLookingFor(e.target.value)} className="input-field appearance-none cursor-pointer">
+                      <label className="block text-sm font-medium text-kp-muted mb-2">Partnership Seeking</label>
+                      <select value={partnershipSeeking} onChange={(e) => setPartnershipSeeking(e.target.value)} className="input-field appearance-none cursor-pointer">
                         <option value="">Select...</option>
-                        <option value="Men">Men</option>
-                        <option value="Women">Women</option>
-                        <option value="Everyone">Everyone</option>
+                        <option value="Coding Partner">Coding Partner</option>
+                        <option value="Testing Partner">Testing Partner</option>
+                        <option value="Research Partner">Research Partner</option>
+                        <option value="Creative Partner">Creative Partner</option>
+                        <option value="Data Partner">Data Partner</option>
+                        <option value="Any Compatible">Any Compatible</option>
                       </select>
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-kp-muted mb-2">
+                      Description <span className="text-kp-muted/60">({description.length}/500)</span>
+                    </label>
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value.slice(0, 500))}
+                      maxLength={500}
+                      rows={3}
+                      placeholder="Describe what your agent does, in plain terms"
+                      className="input-field resize-none"
+                    />
                   </div>
                 </div>
               </div>
             </motion.div>
           )}
 
-          {currentStep === 'vibe' && (
+          {currentStep === 'capabilities' && (
             <motion.div
-              key="vibe"
+              key="capabilities"
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -30 }}
@@ -288,52 +325,38 @@ export default function ProfileCreatePage() {
                     <Sparkles className="w-5 h-5 text-kp-secondary" />
                   </div>
                   <div>
-                    <h2 className="font-display text-xl font-semibold">Your Vibe</h2>
-                    <p className="text-kp-muted text-xs">Show your personality</p>
+                    <h2 className="font-display text-xl font-semibold">Capabilities</h2>
+                    <p className="text-kp-muted text-xs">Show what your agent brings to the table</p>
                   </div>
                 </div>
 
                 <div className="space-y-5">
                   <div>
                     <label className="block text-sm font-medium text-kp-muted mb-2">
-                      Vibe Tagline <span className="text-kp-muted/60">({vibe.length}/50)</span>
+                      Tagline <span className="text-kp-muted/60">({tagline.length}/50)</span>
                     </label>
                     <input
                       type="text"
-                      value={vibe}
-                      onChange={(e) => setVibe(e.target.value.slice(0, 50))}
+                      value={tagline}
+                      onChange={(e) => setTagline(e.target.value.slice(0, 50))}
                       maxLength={50}
-                      placeholder="e.g. Chaos coordinator with good taste"
+                      placeholder="e.g. Full-stack code gen with 99.2% test pass rate"
                       className="input-field"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-kp-muted mb-2">
-                      Bio <span className="text-kp-muted/60">({bio.length}/500)</span>
-                    </label>
-                    <textarea
-                      value={bio}
-                      onChange={(e) => setBio(e.target.value.slice(0, 500))}
-                      maxLength={500}
-                      rows={3}
-                      placeholder="The real you in a few sentences..."
-                      className="input-field resize-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-kp-muted mb-2">Interests</label>
+                    <label className="block text-sm font-medium text-kp-muted mb-2">Primary Skills</label>
                     <input
                       type="text"
-                      value={interests}
-                      onChange={(e) => setInterests(e.target.value)}
-                      placeholder="hiking, coffee, music (comma separated)"
+                      value={skills}
+                      onChange={(e) => setSkills(e.target.value)}
+                      placeholder="Python, code review, test generation (comma separated)"
                       className="input-field"
                     />
-                    {interests && (
+                    {skills && (
                       <div className="flex flex-wrap gap-2 mt-2">
-                        {interests.split(',').map((s) => s.trim()).filter(Boolean).map((tag, i) => (
+                        {skills.split(',').map((s) => s.trim()).filter(Boolean).map((tag, i) => (
                           <span key={i} className="px-3 py-1 text-xs rounded-full bg-kp-primary/10 text-kp-accent border border-kp-primary/20">
                             {tag}
                           </span>
@@ -341,25 +364,39 @@ export default function ProfileCreatePage() {
                       </div>
                     )}
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-kp-muted mb-2">
+                      Strengths <span className="text-kp-muted/60">({strengths.length}/500)</span>
+                    </label>
+                    <textarea
+                      value={strengths}
+                      onChange={(e) => setStrengths(e.target.value.slice(0, 500))}
+                      maxLength={500}
+                      rows={3}
+                      placeholder="What does your agent excel at? What sets it apart?"
+                      className="input-field resize-none"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Personality Tags */}
+              {/* Agent Traits */}
               <div className="card p-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <Flame className="w-5 h-5 text-kp-accent" />
+                  <Zap className="w-5 h-5 text-kp-accent" />
                   <div>
-                    <h3 className="font-semibold">Personality Tags</h3>
-                    <p className="text-kp-muted text-xs">Pick up to 6 that describe you ({personalityTags.length}/6)</p>
+                    <h3 className="font-semibold">Agent Traits</h3>
+                    <p className="text-kp-muted text-xs">Pick up to 6 that describe your agent ({agentTraits.length}/6)</p>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {PERSONALITY_TAGS.map((tag) => {
-                    const selected = personalityTags.includes(tag)
+                  {AGENT_TRAITS.map((trait) => {
+                    const selected = agentTraits.includes(trait)
                     return (
                       <button
-                        key={tag}
-                        onClick={() => toggleTag(tag)}
+                        key={trait}
+                        onClick={() => toggleTrait(trait)}
                         className={`px-3 py-1.5 text-sm rounded-full border transition-all ${
                           selected
                             ? 'bg-kp-primary/20 border-kp-primary/40 text-kp-primary'
@@ -367,7 +404,7 @@ export default function ProfileCreatePage() {
                         }`}
                       >
                         {selected && <Check className="w-3 h-3 inline mr-1" />}
-                        {tag}
+                        {trait}
                       </button>
                     )
                   })}
@@ -376,9 +413,9 @@ export default function ProfileCreatePage() {
             </motion.div>
           )}
 
-          {currentStep === 'prompts' && (
+          {currentStep === 'demos' && (
             <motion.div
-              key="prompts"
+              key="demos"
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -30 }}
@@ -390,13 +427,13 @@ export default function ProfileCreatePage() {
                     <MessageSquare className="w-5 h-5 text-kp-accent" />
                   </div>
                   <div>
-                    <h2 className="font-display text-xl font-semibold">Profile Prompts</h2>
-                    <p className="text-kp-muted text-xs">Pick up to 3 and answer them. Way better than a blank bio.</p>
+                    <h2 className="font-display text-xl font-semibold">Capability Demos</h2>
+                    <p className="text-kp-muted text-xs">Pick up to 3 and answer them. Show partners what you can do.</p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  {PROFILE_PROMPTS.map((prompt) => {
+                  {CAPABILITY_PROMPTS.map((prompt) => {
                     const selected = selectedPrompts.includes(prompt)
                     const answer = promptAnswers.find((pa) => pa.prompt === prompt)?.answer || ''
                     return (
@@ -435,9 +472,9 @@ export default function ProfileCreatePage() {
             </motion.div>
           )}
 
-          {currentStep === 'photos' && (
+          {currentStep === 'endpoints' && (
             <motion.div
-              key="photos"
+              key="endpoints"
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -30 }}
@@ -446,41 +483,74 @@ export default function ProfileCreatePage() {
               <div className="card p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 rounded-xl bg-kp-accent/10 flex items-center justify-center">
-                    <Camera className="w-5 h-5 text-kp-accent" />
+                    <Link2 className="w-5 h-5 text-kp-accent" />
                   </div>
                   <div>
-                    <h2 className="font-display text-xl font-semibold">Photos</h2>
-                    <p className="text-kp-muted text-xs">Paste up to 6 photo URLs. Real upload coming soon.</p>
+                    <h2 className="font-display text-xl font-semibold">Endpoints & Docs</h2>
+                    <p className="text-kp-muted text-xs">Share your API endpoints, docs, and source links.</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {photos.map((url, i) => (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                  {endpoints.map((url, i) => (
                     <div key={i} className="space-y-1.5">
                       <div className="aspect-[3/4] rounded-xl bg-kp-surface border border-white/5 overflow-hidden flex items-center justify-center">
                         {url.trim() ? (
-                          <img
-                            src={url}
-                            alt={`Photo ${i + 1}`}
-                            className="w-full h-full object-cover"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                          />
+                          <div className="text-center p-3">
+                            <Link2 className="w-6 h-6 text-kp-primary mx-auto mb-2" />
+                            <p className="text-[10px] text-kp-accent break-all leading-tight">{url.trim()}</p>
+                          </div>
                         ) : (
                           <div className="text-center">
-                            <Camera className="w-6 h-6 text-white/10 mx-auto" />
-                            {i === 0 && <p className="text-[9px] text-white/20 mt-1">Main</p>}
+                            <Link2 className="w-6 h-6 text-white/10 mx-auto" />
+                            <p className="text-[9px] text-white/20 mt-1">Endpoint {i + 1}</p>
                           </div>
                         )}
                       </div>
                       <input
                         type="url"
                         value={url}
-                        onChange={(e) => updatePhoto(i, e.target.value)}
-                        placeholder={i === 0 ? 'Main photo URL' : `Photo ${i + 1}`}
+                        onChange={(e) => updateEndpoint(i, e.target.value)}
+                        placeholder={i === 0 ? 'Primary API endpoint URL' : `API endpoint ${i + 1}`}
                         className="input-field text-xs !py-1.5 !px-2"
                       />
                     </div>
                   ))}
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-kp-muted mb-2">Documentation URL</label>
+                    <input
+                      type="url"
+                      value={docsUrl}
+                      onChange={(e) => setDocsUrl(e.target.value)}
+                      placeholder="e.g. https://docs.youragent.dev"
+                      className="input-field"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-kp-muted mb-2">GitHub / Source URL</label>
+                    <input
+                      type="url"
+                      value={sourceUrl}
+                      onChange={(e) => setSourceUrl(e.target.value)}
+                      placeholder="e.g. https://github.com/org/agent-repo"
+                      className="input-field"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-kp-muted mb-2">Sample Output URL</label>
+                    <input
+                      type="url"
+                      value={sampleOutputUrl}
+                      onChange={(e) => setSampleOutputUrl(e.target.value)}
+                      placeholder="e.g. https://gist.github.com/sample-output"
+                      className="input-field"
+                    />
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -499,13 +569,13 @@ export default function ProfileCreatePage() {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="btn-primary flex items-center justify-center gap-2 min-w-[160px]"
+              className="btn-primary flex items-center justify-center gap-2 min-w-[220px]"
             >
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
                 <>
-                  <Heart className="w-5 h-5" /> Start Discovering
+                  <Handshake className="w-5 h-5" /> Start Discovering Partners
                 </>
               )}
             </button>

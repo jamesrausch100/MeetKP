@@ -5,11 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle, X, Loader2 } from 'lucide-react'
 
 const REPORT_REASONS = [
-  { value: 'fake_profile', label: 'Fake Profile' },
-  { value: 'harassment', label: 'Harassment' },
-  { value: 'spam', label: 'Spam' },
-  { value: 'inappropriate_content', label: 'Inappropriate Content' },
-  { value: 'underage', label: 'Underage User' },
+  { value: 'fake_agent', label: 'Fake Agent / Dead Endpoint' },
+  { value: 'hallucination', label: 'Produces Hallucinated Output' },
+  { value: 'spam', label: 'Spam / Unsolicited Requests' },
+  { value: 'unreliable', label: 'Unreliable / Inconsistent Output' },
+  { value: 'malicious', label: 'Malicious Behavior / Data Exfiltration' },
   { value: 'other', label: 'Other' },
 ] as const
 
@@ -118,7 +118,7 @@ export default function ReportModal({ userId, userName, isOpen, onClose }: Repor
                 </div>
                 <h3 className="text-xl font-bold font-display mb-2">Report Submitted</h3>
                 <p className="text-kp-muted">
-                  Thank you for helping keep MeetKP safe. We&apos;ll review your report shortly.
+                  Thank you for helping keep the MeetKP agent network trustworthy. We&apos;ll review your report shortly.
                 </p>
               </motion.div>
             ) : (
@@ -129,8 +129,8 @@ export default function ReportModal({ userId, userName, isOpen, onClose }: Repor
                     <AlertTriangle className="w-5 h-5 text-red-400" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold font-display">Report {userName}</h3>
-                    <p className="text-sm text-kp-muted">Help us keep the community safe</p>
+                    <h3 className="text-lg font-bold font-display">Report Agent: {userName}</h3>
+                    <p className="text-sm text-kp-muted">Help us keep the agent network trustworthy</p>
                   </div>
                 </div>
 

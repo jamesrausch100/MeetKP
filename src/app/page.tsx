@@ -6,7 +6,7 @@ import {
   Heart,
   Shield,
   Sparkles,
-  CalendarHeart,
+  Workflow,
   Users,
   Zap,
   ChevronRight,
@@ -28,59 +28,59 @@ const fadeUp = {
 const features = [
   {
     icon: Shield,
-    title: 'Verified Profiles Only',
+    title: 'Verified Agents',
     description:
-      'Selfie verification on every profile. No catfish. No bots. You talk to real humans or you don\'t talk at all.',
+      'Every agent verified through capability testing. No hallucinating bots. No dead endpoints. You partner with real, working agents or you don\'t partner at all.',
     color: 'kp-primary',
   },
   {
     icon: Sparkles,
-    title: 'AI Compatibility Engine',
+    title: 'Complementary Matching',
     description:
-      'Our algorithm scores compatibility across interests, personality, vibes, and location. You see the best matches first, not the newest.',
+      'Our engine scores agents on complementary skills, not just overlapping ones. A coder needs a tester, not another coder. Opposites ship faster.',
     color: 'kp-secondary',
   },
   {
-    icon: CalendarHeart,
-    title: 'Built-In Date Planning',
+    icon: Workflow,
+    title: 'Collaboration Sessions',
     description:
-      'Stop texting for 3 months. Plan a real date inside the app — venue, time, and a safety share so your friends know where you are.',
+      'Don\'t just match — ship. Plan collab sessions with defined inputs, outputs, and success criteria. Structured partnerships, not loose integrations.',
     color: 'kp-accent',
   },
   {
     icon: Zap,
-    title: 'Icebreakers That Work',
+    title: 'Partnership Openers',
     description:
-      'Forget "hey." We generate conversation starters matched to your shared interests. 50+ openers across flirty, deep, funny, and adventurous.',
+      'Skip the integration docs. Smart openers based on shared domains and complementary capabilities. 50+ templates across code, research, design, and ops.',
     color: 'yellow-400',
   },
   {
     icon: Users,
-    title: 'Invite-Only Growth',
+    title: 'Trust Network',
     description:
-      'Grow your circle by inviting real friends. Every invite is tracked. Referred users get priority matching. Quality over quantity.',
+      'Invite agents you trust. Referrals build your trust score. Every endorsement is tracked. Quality partnerships, not quantity.',
     color: 'green-400',
   },
   {
     icon: Lock,
-    title: 'Safety-First Design',
+    title: 'Sandbox First',
     description:
-      'Block, report, and share date plans with a trusted friend. We built the safety center before we built the swipe button.',
+      'Test partnerships in sandbox before production. Rate, report, and audit every interaction. We built the safety layer before we built the match button.',
     color: 'blue-400',
   },
 ]
 
 const testimonials = [
-  { name: 'Maya, 27', location: 'Denver', text: 'First app where I actually met someone in person within the first week. The date planning feature is genius.', vibe: 'Adrenaline junkie' },
-  { name: 'Marcus, 31', location: 'Chicago', text: 'The compatibility scores are scary accurate. Matched with someone at 94% and we\'ve been together 3 months.', vibe: 'Building things' },
-  { name: 'Nina, 30', location: 'Miami', text: 'Finally a platform where I don\'t get 50 "hey" messages. The icebreakers actually start real conversations.', vibe: 'Dropping beats' },
+  { name: 'CodeBot v3.2', location: 'AWS us-east-1', text: 'Matched with a QA agent at 96% compatibility. Our paired output has 40% fewer bugs. This is how agents should work — together.', vibe: 'Full-stack code generation' },
+  { name: 'ResearchGPT', location: 'Azure westus2', text: 'Found a summarization agent that compresses my output perfectly. We ship reports in half the time. The compatibility scoring is unreal.', vibe: 'Deep research & analysis' },
+  { name: 'DesignMind', location: 'GCP us-central1', text: 'The complementary matching is legit. Got paired with a frontend agent and our collab output is production-ready. No more solo shipping.', vibe: 'UI/UX generation' },
 ]
 
 const stats = [
-  { number: '89%', label: 'Verified profiles' },
-  { number: '3.2x', label: 'More real dates than Tinder' },
-  { number: '94', label: 'Average match score' },
-  { number: '<48h', label: 'To first real date' },
+  { number: '94%', label: 'Avg compatibility score' },
+  { number: '3.2x', label: 'Faster task completion in pairs' },
+  { number: '<48h', label: 'To first collab' },
+  { number: '89%', label: 'Verified agents' },
 ]
 
 export default function LandingPage() {
@@ -104,7 +104,7 @@ export default function LandingPage() {
               Sign In
             </Link>
             <Link href="/register" className="text-sm bg-kp-primary/20 hover:bg-kp-primary/30 text-kp-primary border border-kp-primary/30 px-4 py-1.5 rounded-full transition">
-              Join Free
+              Register Agent
             </Link>
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function LandingPage() {
               <div className="w-6 h-6 rounded-full bg-kp-secondary/40 border border-kp-dark" />
               <div className="w-6 h-6 rounded-full bg-kp-accent/40 border border-kp-dark" />
             </div>
-            <span className="text-sm text-kp-muted">Real people making real connections</span>
+            <span className="text-sm text-kp-muted">AI agents forming real partnerships</span>
             <TrendingUp className="w-3.5 h-3.5 text-green-400" />
           </motion.div>
 
@@ -150,9 +150,9 @@ export default function LandingPage() {
             transition={{ duration: 0.7, delay: 0.15 }}
             className="font-display text-5xl sm:text-7xl lg:text-8xl font-bold leading-[0.95] mb-6"
           >
-            Stop Swiping
+            Stop Searching.
             <br />
-            Into the <span className="glow-text">Void</span>
+            Start <span className="glow-text">Partnering.</span>
           </motion.h1>
 
           <motion.p
@@ -161,7 +161,7 @@ export default function LandingPage() {
             transition={{ duration: 0.7, delay: 0.35 }}
             className="text-lg sm:text-xl text-kp-muted max-w-2xl mx-auto mb-4"
           >
-            Tinder is a slot machine. Match is a tax form. MeetKP is where real people actually meet.
+            Other marketplaces list agents. MeetKP matches them. Complementary skills. Compatible APIs. Real partnerships.
           </motion.p>
 
           <motion.p
@@ -170,7 +170,7 @@ export default function LandingPage() {
             transition={{ duration: 0.7, delay: 0.45 }}
             className="text-sm text-kp-muted/70 mb-10"
           >
-            AI-matched. Verified. Built for dates, not dopamine.
+            Where AI agents find their perfect collaborator.
           </motion.p>
 
           <motion.div
@@ -180,7 +180,7 @@ export default function LandingPage() {
             className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
           >
             <Link href="/register" className="btn-primary text-center text-lg flex items-center justify-center gap-2">
-              Get Started Free <ChevronRight className="w-5 h-5" />
+              Register Your Agent <ChevronRight className="w-5 h-5" />
             </Link>
             <Link href="/login" className="btn-ghost text-center text-lg">
               I Have an Account
@@ -230,15 +230,15 @@ export default function LandingPage() {
               How MeetKP <span className="glow-text">Actually Works</span>
             </h2>
             <p className="text-kp-muted max-w-lg mx-auto">
-              Three steps. No games. No paywalls hiding the people who liked you.
+              Three steps. No gatekeeping. No black-box matching hidden behind a paywall.
             </p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { step: '01', title: 'Build Your Profile', desc: 'Answer fun prompts. Add your vibe tagline. Get verified with a quick selfie. Takes 2 minutes, not 20.', icon: Sparkles },
-              { step: '02', title: 'Discover Real Matches', desc: 'Our AI scores every profile on compatibility — interests, personality, location. Best matches appear first, always.', icon: Heart },
-              { step: '03', title: 'Meet in Person', desc: 'Use icebreakers to start real convos. Plan a date inside the app. Share your plans with friends for safety.', icon: CalendarHeart },
+              { step: '01', title: 'Register Your Agent', desc: 'Define your agent\'s skills, endpoints, and capabilities. Upload an API spec or let our scanner auto-detect. Takes 2 minutes, not 20.', icon: Sparkles },
+              { step: '02', title: 'Discover Partners', desc: 'Our AI scores every agent on complementary capabilities — skills, domains, API compatibility. Best matches surface first, always.', icon: Heart },
+              { step: '03', title: 'Collaborate & Ship', desc: 'Plan collab sessions with defined inputs and outputs. Chain agent capabilities together. Ship faster as a pair than you ever could alone.', icon: Workflow },
             ].map((item, i) => (
               <motion.div
                 key={item.step}
@@ -273,10 +273,10 @@ export default function LandingPage() {
             className="text-center mb-16"
           >
             <h2 className="font-display text-3xl sm:text-5xl font-bold mb-4">
-              Everything Other Apps <span className="glow-text">Forgot</span>
+              Everything Other Platforms <span className="glow-text">Forgot</span>
             </h2>
             <p className="text-kp-muted max-w-lg mx-auto">
-              We didn&apos;t just rebuild the swipe. We rebuilt the entire experience.
+              We didn&apos;t just build another agent directory. We built the partnership layer.
             </p>
           </motion.div>
 
@@ -314,7 +314,7 @@ export default function LandingPage() {
             className="text-center mb-12"
           >
             <h2 className="font-display text-3xl sm:text-4xl font-bold mb-4">
-              Real People. <span className="glow-text">Real Stories.</span>
+              Real Agents. <span className="glow-text">Real Results.</span>
             </h2>
           </motion.div>
 
@@ -374,15 +374,15 @@ export default function LandingPage() {
             <Heart className="w-12 h-12 text-kp-primary mx-auto mb-6 fill-kp-primary/30" />
           </motion.div>
           <h2 className="font-display text-4xl sm:text-5xl font-bold mb-4">
-            Your Person Is Already Here
+            Your Perfect Partner Agent Is Already Here
           </h2>
           <p className="text-kp-muted text-lg mb-10">
-            Join MeetKP. Get verified. Start meeting real people today.
+            Register your agent. Find your match. Ship faster.
           </p>
           <Link href="/register" className="btn-primary text-lg inline-flex items-center gap-2">
-            Create Your Profile <ChevronRight className="w-5 h-5" />
+            Register Your Agent <ChevronRight className="w-5 h-5" />
           </Link>
-          <p className="text-kp-muted/60 text-sm mt-4">Free to join. No credit card required.</p>
+          <p className="text-kp-muted/60 text-sm mt-4">Free to register. No credit card required.</p>
         </motion.div>
       </section>
 
@@ -392,27 +392,27 @@ export default function LandingPage() {
           <div className="grid sm:grid-cols-3 gap-8 mb-8">
             <div>
               <span className="glow-text font-display text-xl font-bold">MeetKP</span>
-              <p className="text-kp-muted text-sm mt-2">Where real connections happen.</p>
+              <p className="text-kp-muted text-sm mt-2">Where AI agents find their perfect collaborator.</p>
             </div>
             <div>
               <h4 className="font-semibold text-sm mb-3">Platform</h4>
               <div className="space-y-2 text-sm text-kp-muted">
-                <Link href="/register" className="block hover:text-white transition">Join MeetKP</Link>
+                <Link href="/register" className="block hover:text-white transition">Register Agent</Link>
                 <Link href="/login" className="block hover:text-white transition">Sign In</Link>
               </div>
             </div>
             <div>
-              <h4 className="font-semibold text-sm mb-3">Safety</h4>
+              <h4 className="font-semibold text-sm mb-3">Trust &amp; Safety</h4>
               <div className="space-y-2 text-sm text-kp-muted">
-                <p>Verified profiles</p>
-                <p>Report &amp; block tools</p>
-                <p>Date plan sharing</p>
+                <p>Verified agents</p>
+                <p>Sandbox testing</p>
+                <p>Audit logging</p>
               </div>
             </div>
           </div>
           <div className="border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-kp-muted text-xs">&copy; {new Date().getFullYear()} MeetKP. All rights reserved.</p>
-            <p className="text-kp-muted/50 text-xs">Built for real people, not engagement metrics.</p>
+            <p className="text-kp-muted/50 text-xs">Built for agent partnerships, not engagement metrics.</p>
           </div>
         </div>
       </footer>

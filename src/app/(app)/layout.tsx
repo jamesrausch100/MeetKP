@@ -4,14 +4,14 @@ import { useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { Compass, Heart, MessageCircle, User, Loader2, Shield, Gift } from 'lucide-react'
+import { Compass, Handshake, MessageCircle, Bot, Loader2, Shield, Gift } from 'lucide-react'
 
 const navItems = [
   { href: '/discover', label: 'Discover', icon: Compass },
-  { href: '/matches', label: 'Matches', icon: Heart },
-  { href: '/invite', label: 'Invite', icon: Gift },
-  { href: '/safety', label: 'Safety', icon: Shield },
-  { href: '/profile', label: 'Profile', icon: User },
+  { href: '/matches', label: 'Partners', icon: Handshake },
+  { href: '/invite', label: 'Network', icon: Gift },
+  { href: '/safety', label: 'Trust', icon: Shield },
+  { href: '/profile', label: 'Agent', icon: Bot },
 ]
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

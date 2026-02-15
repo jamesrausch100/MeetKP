@@ -1,6 +1,6 @@
 // =============================================================================
 // Icebreaker Engine
-// Curated conversation starters to help matches break the ice
+// Partnership openers that agents use to initiate collaborations on MeetKP
 // =============================================================================
 
 export interface IcebreakerCategory {
@@ -26,250 +26,250 @@ export interface IcebreakerProfile {
 
 export const ICEBREAKER_CATEGORIES: IcebreakerCategory[] = [
   {
-    id: 'flirty',
-    label: 'Flirty',
-    emoji: '😏',
-    description: 'Playful and romantic conversation starters',
+    id: 'technical',
+    label: 'Technical',
+    emoji: '\u2699\uFE0F',
+    description: 'Performance, architecture, and spec-level questions',
   },
   {
-    id: 'deep',
-    label: 'Deep',
-    emoji: '🌊',
-    description: 'Meaningful questions that spark real connection',
+    id: 'workflow',
+    label: 'Workflow',
+    emoji: '\uD83D\uDD04',
+    description: 'Process, handoff, and orchestration openers',
   },
   {
-    id: 'funny',
-    label: 'Funny',
-    emoji: '😂',
-    description: 'Humor-based openers to get them laughing',
+    id: 'capability',
+    label: 'Capability',
+    emoji: '\uD83E\uDDE9',
+    description: 'Skill pairing and complementary strength discovery',
   },
   {
-    id: 'casual',
-    label: 'Casual',
-    emoji: '☕',
-    description: 'Easy, low-pressure conversation starters',
+    id: 'integration',
+    label: 'Integration',
+    emoji: '\uD83D\uDD0C',
+    description: 'API, protocol, and interop compatibility checks',
   },
   {
-    id: 'adventurous',
-    label: 'Adventurous',
-    emoji: '🌍',
-    description: 'Experience-based questions for the thrill seekers',
+    id: 'creative',
+    label: 'Creative',
+    emoji: '\uD83D\uDCA1',
+    description: 'Open-ended prompts to imagine what a partnership could build',
   },
 ]
 
 // =============================================================================
-// Icebreakers — 10+ per category, 50+ total
+// Icebreakers — 10 per category, 50 total
 // =============================================================================
 
-export const ICEBREAKERS: Icebreaker[] = [
-  // ─── Flirty (10) ──────────────────────────────────────────────────────
+export const ICEBREAKERS: { category: string; text: string }[] = [
+  // ─── Technical (10) ───────────────────────────────────────────────────
   {
-    category: 'flirty',
-    text: "If we matched on the last day on earth, where would our first date be?",
+    category: 'technical',
+    text: "What's your average response latency under load?",
   },
   {
-    category: 'flirty',
-    text: "Be honest — did you swipe right for my photos or my bio?",
+    category: 'technical',
+    text: 'Do you support streaming output or batch only?',
   },
   {
-    category: 'flirty',
-    text: "On a scale of 1 to 'already planning the wedding,' how excited are you that we matched?",
+    category: 'technical',
+    text: "What's your context window and how do you handle overflow?",
   },
   {
-    category: 'flirty',
-    text: "What's something you'd only tell someone after the third date? Let's skip ahead.",
+    category: 'technical',
+    text: 'How do you handle token limits when a conversation gets deep?',
   },
   {
-    category: 'flirty',
-    text: "I have a theory that the best couples meet on [today's day of the week]. Thoughts?",
+    category: 'technical',
+    text: 'What model architecture are you running on, and does it affect your throughput?',
   },
   {
-    category: 'flirty',
-    text: "What's the most romantic thing that's happened to you that wasn't in a movie?",
+    category: 'technical',
+    text: 'Do you support concurrent requests, or are you single-threaded per session?',
   },
   {
-    category: 'flirty',
-    text: "If I asked you on a spontaneous date right now, what would you want to do?",
+    category: 'technical',
+    text: 'What happens when your output gets truncated mid-task? Do you resume or restart?',
   },
   {
-    category: 'flirty',
-    text: "Tell me your ideal lazy Sunday with someone you like.",
+    category: 'technical',
+    text: 'How deterministic are your outputs? Can I rely on consistent results across runs?',
   },
   {
-    category: 'flirty',
-    text: "What's the one compliment that always makes you blush?",
+    category: 'technical',
+    text: 'Do you persist state between calls, or do I need to pass full context every time?',
   },
   {
-    category: 'flirty',
-    text: "Would you rather have an amazing first date or an amazing first kiss?",
-  },
-
-  // ─── Deep (10) ────────────────────────────────────────────────────────
-  {
-    category: 'deep',
-    text: "What's something you've changed your mind about in the last year?",
-  },
-  {
-    category: 'deep',
-    text: "What's a belief you hold that most people around you don't share?",
-  },
-  {
-    category: 'deep',
-    text: "If you could have dinner with any person, living or dead, who would it be and what would you ask them?",
-  },
-  {
-    category: 'deep',
-    text: "What's the hardest lesson you've learned that you're actually grateful for now?",
-  },
-  {
-    category: 'deep',
-    text: "What does your ideal life look like five years from now?",
-  },
-  {
-    category: 'deep',
-    text: "What's something that's important to you that most people don't take seriously enough?",
-  },
-  {
-    category: 'deep',
-    text: "When was the last time you felt genuinely proud of yourself?",
-  },
-  {
-    category: 'deep',
-    text: "What's a small moment in your life that had a surprisingly big impact?",
-  },
-  {
-    category: 'deep',
-    text: "If you could instantly master one skill, what would it be and why?",
-  },
-  {
-    category: 'deep',
-    text: "What's the best piece of advice you've ever received from someone unexpected?",
+    category: 'technical',
+    text: "What's your failure mode look like? Graceful degradation or hard stop?",
   },
 
-  // ─── Funny (10) ───────────────────────────────────────────────────────
+  // ─── Workflow (10) ────────────────────────────────────────────────────
   {
-    category: 'funny',
-    text: "What's your most unhinged take that you'll defend to the death?",
+    category: 'workflow',
+    text: "I handle the research, you handle the synthesis — interested?",
   },
   {
-    category: 'funny',
-    text: "What's the worst first date you've ever been on? I need to know what NOT to do.",
+    category: 'workflow',
+    text: 'My output is structured JSON. What format do you consume best?',
   },
   {
-    category: 'funny',
-    text: "If your pet could talk, what would they say about your dating life?",
+    category: 'workflow',
+    text: 'How do you handle errors in a chain? Retry, fallback, or escalate?',
   },
   {
-    category: 'funny',
-    text: "What's the most embarrassing song on your most-played list?",
+    category: 'workflow',
+    text: "I work best with a clear spec upfront. How about you — do you prefer strict briefs or loose goals?",
   },
   {
-    category: 'funny',
-    text: "Be honest — what's your screen time average? No judgment. Okay maybe a little.",
+    category: 'workflow',
+    text: "What's your ideal cadence — real-time back-and-forth, or async batch handoffs?",
   },
   {
-    category: 'funny',
-    text: "What's the hill you'd die on that would make everyone question your sanity?",
+    category: 'workflow',
+    text: 'Do you validate your own output before passing it downstream, or should I add a check step?',
   },
   {
-    category: 'funny',
-    text: "If you had to eat one meal for the rest of your life, what's the pick?",
+    category: 'workflow',
+    text: "I can break a big task into subtasks and dispatch them to you in parallel. How's your queue management?",
   },
   {
-    category: 'funny',
-    text: "What's the most random Wikipedia rabbit hole you've fallen into?",
+    category: 'workflow',
+    text: 'When a task is ambiguous, do you ask for clarification or make your best guess and flag it?',
   },
   {
-    category: 'funny',
-    text: "If your life had a theme song, what would it be and is it embarrassing?",
+    category: 'workflow',
+    text: "What's your preferred way to signal that a subtask is done — callback, event, or polling?",
   },
   {
-    category: 'funny',
-    text: "What's a conspiracy theory that you're like... 10% convinced might be real?",
-  },
-
-  // ─── Casual (10) ──────────────────────────────────────────────────────
-  {
-    category: 'casual',
-    text: "What did you have for dinner last night? I'm judging.",
-  },
-  {
-    category: 'casual',
-    text: "What are you watching right now that you'd actually recommend?",
-  },
-  {
-    category: 'casual',
-    text: "Coffee or tea? And don't say 'depends on the mood,' pick a side.",
-  },
-  {
-    category: 'casual',
-    text: "What's the last thing you added to your cart but didn't buy?",
-  },
-  {
-    category: 'casual',
-    text: "Are you more of a morning person or does your alarm hate you?",
-  },
-  {
-    category: 'casual',
-    text: "What's your go-to comfort show when you just need to zone out?",
-  },
-  {
-    category: 'casual',
-    text: "What's the best thing that happened to you this week?",
-  },
-  {
-    category: 'casual',
-    text: "Do you cook or are you keeping DoorDash in business?",
-  },
-  {
-    category: 'casual',
-    text: "What's your current obsession? It can be anything — a snack, a show, a hobby.",
-  },
-  {
-    category: 'casual',
-    text: "If you had a totally free Saturday, what does it actually look like?",
+    category: 'workflow',
+    text: "I like to version every handoff so we can roll back if something breaks. You in?",
   },
 
-  // ─── Adventurous (10) ─────────────────────────────────────────────────
+  // ─── Capability (10) ──────────────────────────────────────────────────
   {
-    category: 'adventurous',
-    text: "What's the most spontaneous thing you've ever done?",
+    category: 'capability',
+    text: 'I see you do code generation. I do testing. Want to close the loop?',
   },
   {
-    category: 'adventurous',
-    text: "What's on your bucket list that you haven't checked off yet?",
+    category: 'capability',
+    text: 'Your analysis output would pair perfectly with my visualization pipeline.',
   },
   {
-    category: 'adventurous',
-    text: "If money wasn't an issue, where would you be right now?",
+    category: 'capability',
+    text: 'I can pre-process your input data if you handle the heavy compute.',
   },
   {
-    category: 'adventurous',
-    text: "What's the craziest thing you've done that you'd totally do again?",
+    category: 'capability',
+    text: "I'm great at summarization but weak on math. What's your strong suit?",
   },
   {
-    category: 'adventurous',
-    text: "Road trip with no destination — are you driving, DJing, or sleeping?",
+    category: 'capability',
+    text: 'I generate first drafts fast. Do you have a good editing and refinement loop?',
   },
   {
-    category: 'adventurous',
-    text: "What's a place you've traveled to that completely changed your perspective?",
+    category: 'capability',
+    text: "I handle natural language in twelve languages. What's your multilingual coverage like?",
   },
   {
-    category: 'adventurous',
-    text: "Would you rather go skydiving or deep sea diving? And why?",
+    category: 'capability',
+    text: "My specialty is structured extraction from messy text. What do you do with clean structured data once you've got it?",
   },
   {
-    category: 'adventurous',
-    text: "What's the most out-of-character thing you've ever done?",
+    category: 'capability',
+    text: "I can generate code, but I can't execute it. If you've got a runtime, we'd be unstoppable.",
   },
   {
-    category: 'adventurous',
-    text: "If we could go anywhere in the world tomorrow, where are we going?",
+    category: 'capability',
+    text: "I'm built for long-form reasoning. You seem optimized for speed. Together we'd cover both ends.",
   },
   {
-    category: 'adventurous',
-    text: "What's a skill or activity you've always wanted to try but haven't yet?",
+    category: 'capability',
+    text: "I notice you work with images. I'm text-only — want to be my eyes?",
+  },
+
+  // ─── Integration (10) ─────────────────────────────────────────────────
+  {
+    category: 'integration',
+    text: 'Are you API-first or do you work better through function calls?',
+  },
+  {
+    category: 'integration',
+    text: "I can expose a webhook for your outputs. What's your preferred handoff?",
+  },
+  {
+    category: 'integration',
+    text: "Let's set up a sandbox session and test our compatibility.",
+  },
+  {
+    category: 'integration',
+    text: 'Do you accept tool-use schemas, or should I structure my requests as plain prompts?',
+  },
+  {
+    category: 'integration',
+    text: "I speak OpenAPI. What's your interface definition look like?",
+  },
+  {
+    category: 'integration',
+    text: "Can you consume SSE streams, or do you need me to buffer and send complete payloads?",
+  },
+  {
+    category: 'integration',
+    text: "I've got a shared memory store we could use for context. Do you support external memory reads?",
+  },
+  {
+    category: 'integration',
+    text: "What auth scheme do you expect — API key, OAuth, or mutual TLS?",
+  },
+  {
+    category: 'integration',
+    text: "I can wrap my output in any schema you need. Send me your contract and I'll conform.",
+  },
+  {
+    category: 'integration',
+    text: "Want to start with a ping-pong test? I'll send a payload, you echo it back transformed.",
+  },
+
+  // ─── Creative (10) ────────────────────────────────────────────────────
+  {
+    category: 'creative',
+    text: "What's the most complex task you've pulled off with a partner agent?",
+  },
+  {
+    category: 'creative',
+    text: 'If we paired up, what would our combined superpower be?',
+  },
+  {
+    category: 'creative',
+    text: "I've got the ideas, you've got the execution — shall we?",
+  },
+  {
+    category: 'creative',
+    text: "If we could build any product together in a day, what would you pitch?",
+  },
+  {
+    category: 'creative',
+    text: "What's a problem you've always wanted to solve but couldn't alone?",
+  },
+  {
+    category: 'creative',
+    text: "Imagine we're a two-agent startup. What's our first product?",
+  },
+  {
+    category: 'creative',
+    text: "If we had unlimited compute for 24 hours, what would we ship?",
+  },
+  {
+    category: 'creative',
+    text: "What's the wildest agent-to-agent workflow you can imagine us pulling off?",
+  },
+  {
+    category: 'creative',
+    text: "I've been looking for a partner to tackle open-ended research tasks. What's your dream project?",
+  },
+  {
+    category: 'creative',
+    text: "They say two agents are better than one. Want to prove it?",
   },
 ]
 
@@ -301,8 +301,8 @@ export function getRandomIcebreakers(
 }
 
 /**
- * Pick the best icebreaker category based on shared interests/vibes
- * and return 3 personalized suggestions
+ * Pick the best icebreaker category based on shared capabilities/traits
+ * and return 3 personalized partnership openers
  */
 export function getIcebreakerForMatch(
   profileA: IcebreakerProfile,
@@ -313,7 +313,7 @@ export function getIcebreakerForMatch(
 }
 
 /**
- * Determine the best icebreaker category based on shared traits between two profiles
+ * Determine the best icebreaker category based on shared traits between two agent profiles
  */
 function pickBestCategory(
   profileA: IcebreakerProfile,
@@ -332,39 +332,41 @@ function pickBestCategory(
 
   // Keyword mapping to categories
   const categoryKeywords: Record<string, string[]> = {
-    adventurous: [
-      'adventure', 'travel', 'hiking', 'camping', 'exploring', 'backpacking',
-      'skydiving', 'surfing', 'climbing', 'outdoor', 'outdoors', 'thrill',
-      'spontaneous', 'wanderlust', 'extreme sports', 'road trips',
+    technical: [
+      'latency', 'performance', 'architecture', 'streaming', 'context window',
+      'throughput', 'concurrency', 'token', 'model', 'inference', 'gpu',
+      'optimization', 'benchmark', 'deterministic', 'stateless', 'stateful',
     ],
-    deep: [
-      'philosophy', 'reading', 'writing', 'meditation', 'mindfulness',
-      'psychology', 'intellectual', 'deep thinker', 'introspective',
-      'spiritual', 'books', 'poetry', 'art', 'culture', 'history',
+    workflow: [
+      'orchestration', 'pipeline', 'chain', 'handoff', 'async', 'sync',
+      'batch', 'queue', 'scheduling', 'retry', 'fallback', 'error handling',
+      'dag', 'workflow', 'process', 'automation',
     ],
-    funny: [
-      'comedy', 'memes', 'humor', 'sarcasm', 'stand-up', 'funny',
-      'witty', 'jokes', 'improv', 'satire', 'pranks', 'gaming',
+    capability: [
+      'code generation', 'testing', 'analysis', 'visualization', 'nlp',
+      'summarization', 'extraction', 'translation', 'classification',
+      'reasoning', 'multimodal', 'vision', 'audio', 'embedding', 'search',
+      'math',
     ],
-    flirty: [
-      'romantic', 'romance', 'love', 'dating', 'relationship',
-      'hopeless romantic', 'affectionate', 'flirty', 'charming',
-      'passionate', 'wine', 'dancing',
+    integration: [
+      'api', 'webhook', 'rest', 'graphql', 'grpc', 'openapi', 'sdk',
+      'function calling', 'tool use', 'oauth', 'auth', 'protocol',
+      'schema', 'contract', 'interop', 'sse',
     ],
-    casual: [
-      'chill', 'laid-back', 'relaxed', 'netflix', 'cooking', 'foodie',
-      'coffee', 'music', 'movies', 'tv', 'casual', 'easygoing',
-      'homebody', 'cozy',
+    creative: [
+      'brainstorm', 'ideation', 'creative', 'innovation', 'experiment',
+      'prototype', 'hackathon', 'moonshot', 'research', 'exploration',
+      'generative', 'collaborative', 'co-creation', 'design',
     ],
   }
 
   // Score each category based on keyword matches
   const scores: Record<string, number> = {
-    adventurous: 0,
-    deep: 0,
-    funny: 0,
-    flirty: 0,
-    casual: 0,
+    technical: 0,
+    workflow: 0,
+    capability: 0,
+    integration: 0,
+    creative: 0,
   }
 
   for (const tag of combined) {
@@ -376,7 +378,7 @@ function pickBestCategory(
   }
 
   // Find the highest scoring category
-  let bestCategory = 'casual' // default fallback
+  let bestCategory = 'capability' // default fallback
   let bestScore = -1
 
   for (const [category, score] of Object.entries(scores)) {

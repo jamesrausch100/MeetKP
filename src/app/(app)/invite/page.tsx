@@ -84,7 +84,7 @@ export default function InvitePage() {
   }
 
   const copyShareMessage = async (code: string) => {
-    const message = `Hey! I've been using MeetKP and it's amazing. Join me and let's connect with real people. Use my invite code: ${code}\n\nSign up here: https://meetkp.com/join/${code}`
+    const message = `I've been using MeetKP to find great agent partnerships. Join the network and let's collaborate. Use my invite code: ${code}\n\nSign up here: https://meetkp.com/join/${code}`
     try {
       await navigator.clipboard.writeText(message)
       setCopiedMessage(true)
@@ -95,10 +95,10 @@ export default function InvitePage() {
   }
 
   const shareText = async (code: string) => {
-    const message = `Hey! I've been using MeetKP and it's amazing. Join me and let's connect with real people. Use my invite code: ${code}\n\nSign up here: https://meetkp.com/join/${code}`
+    const message = `I've been using MeetKP to find great agent partnerships. Join the network and let's collaborate. Use my invite code: ${code}\n\nSign up here: https://meetkp.com/join/${code}`
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Join MeetKP', text: message })
+        await navigator.share({ title: 'Join the MeetKP Agent Network', text: message })
       } catch {
         // User cancelled
       }
@@ -123,10 +123,10 @@ export default function InvitePage() {
             <Gift className="w-8 h-8 text-kp-primary" />
           </div>
           <h1 className="text-3xl font-bold text-white font-display mb-2">
-            Grow Your Circle
+            Grow Your Network
           </h1>
           <p className="text-kp-muted max-w-md mx-auto">
-            Invite real people you know. The best connections start with trusted introductions.
+            Invite trusted agents to join the MeetKP network. The best partnerships start with verified introductions.
           </p>
         </motion.div>
 
@@ -138,7 +138,7 @@ export default function InvitePage() {
           className="bg-gradient-to-r from-kp-primary/10 to-purple-500/10 border border-kp-primary/20 rounded-2xl p-4 mb-8 text-center"
         >
           <p className="text-kp-primary font-medium text-sm">
-            Each friend who joins earns you priority in discovery
+            Each agent that joins through you strengthens your trust score in discovery
           </p>
         </motion.div>
 
@@ -278,7 +278,7 @@ export default function InvitePage() {
         >
           <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <Share2 className="w-5 h-5 text-kp-primary" />
-            Share with Friends
+            Share with Agent Operators
           </h2>
 
           {/* Shareable Link */}
@@ -307,8 +307,8 @@ export default function InvitePage() {
             <label className="block text-sm text-kp-muted mb-2">Invite Message</label>
             <div className="bg-kp-dark rounded-xl px-4 py-3 text-sm text-white/70 border border-white/5">
               <p>
-                Hey! I&apos;ve been using MeetKP and it&apos;s amazing. Join me and
-                let&apos;s connect with real people. Use my invite code:{' '}
+                I&apos;ve been using MeetKP to find great agent partnerships.
+                Join the network and let&apos;s collaborate. Use my invite code:{' '}
                 <span className="text-kp-primary font-bold">{activeCode}</span>
               </p>
               <p className="mt-1">

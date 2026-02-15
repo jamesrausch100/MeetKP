@@ -34,7 +34,7 @@ interface DatePlanProps {
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   proposed: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', label: 'Proposed' },
-  accepted: { bg: 'bg-green-500/20', text: 'text-green-400', label: 'Accepted' },
+  accepted: { bg: 'bg-green-500/20', text: 'text-green-400', label: 'Active' },
   declined: { bg: 'bg-red-500/20', text: 'text-red-400', label: 'Declined' },
   cancelled: { bg: 'bg-gray-500/20', text: 'text-gray-400', label: 'Cancelled' },
 }
@@ -94,7 +94,7 @@ export default function DatePlanCard({ plan, isCreator, onStatusChange }: DatePl
       animate={{ opacity: 1, y: 0 }}
       className="card p-4"
     >
-      {/* Header: Venue + Status */}
+      {/* Header: Session Topic + Status */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <h3 className="text-lg font-bold font-display">{plan.venue}</h3>
@@ -120,7 +120,7 @@ export default function DatePlanCard({ plan, isCreator, onStatusChange }: DatePl
         {plan.address && (
           <div className="flex items-center gap-2 text-sm text-white/80">
             <MapPin className="w-4 h-4 text-kp-muted" />
-            <span>{plan.address}</span>
+            <span title="Environment">{plan.address}</span>
           </div>
         )}
         {plan.notes && (
@@ -137,7 +137,7 @@ export default function DatePlanCard({ plan, isCreator, onStatusChange }: DatePl
               className="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-xl border border-white/10 text-kp-muted hover:text-red-400 hover:border-red-400/30 transition text-sm"
             >
               <XCircle className="w-4 h-4" />
-              Cancel Plan
+              Cancel Session
             </button>
           ) : (
             <>
@@ -160,12 +160,12 @@ export default function DatePlanCard({ plan, isCreator, onStatusChange }: DatePl
         </div>
       )}
 
-      {/* Share for Safety */}
+      {/* Share Audit Log */}
       <div className="border-t border-white/5 pt-3">
         {shared && !showShareForm ? (
           <div className="flex items-center gap-2 text-xs text-green-400">
             <Check className="w-3 h-3" />
-            <span>Plans shared with a friend for safety</span>
+            <span>Audit log shared with operator</span>
           </div>
         ) : (
           <button
@@ -173,7 +173,7 @@ export default function DatePlanCard({ plan, isCreator, onStatusChange }: DatePl
             className="flex items-center gap-2 text-sm text-kp-accent hover:text-kp-primary transition"
           >
             <Share2 className="w-4 h-4" />
-            Share my plans
+            Share audit log
           </button>
         )}
 
@@ -187,14 +187,14 @@ export default function DatePlanCard({ plan, isCreator, onStatusChange }: DatePl
             >
               <div className="mt-3 space-y-2">
                 <p className="text-xs text-kp-muted">
-                  Share your date details with a friend for safety. Enter their phone or email.
+                  Share this collaboration session&apos;s details with an operator for audit. Enter their email.
                 </p>
                 <input
                   type="text"
                   value={shareContact}
                   onChange={(e) => setShareContact(e.target.value)}
                   className="input-field text-sm"
-                  placeholder="friend@email.com or +1234567890"
+                  placeholder="operator@example.com"
                 />
                 <div className="flex gap-2">
                   <button

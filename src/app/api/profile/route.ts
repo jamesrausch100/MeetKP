@@ -81,18 +81,16 @@ export async function POST(request: Request) {
     personalityTags, promptAnswers, dealbreakers, ageRangeMin, ageRangeMax, maxDistance,
   } = body
 
-  if (!name || !age) {
-    return NextResponse.json({ error: 'Name and age are required' }, { status: 400 })
+  if (!name) {
+    return NextResponse.json({ error: 'Name is required' }, { status: 400 })
   }
 
-  if (typeof age !== 'number' || age < 18 || age > 120) {
-    return NextResponse.json({ error: 'Age must be between 18 and 120' }, { status: 400 })
-  }
+  const ageNum = typeof age === 'number' ? age : 0
 
   const profileData: any = {
     userId,
     name,
-    age,
+    age: ageNum,
     bio: bio ?? '',
     gender: gender ?? '',
     lookingFor: lookingFor ?? '',
@@ -143,8 +141,8 @@ export async function PUT(request: Request) {
     personalityTags, promptAnswers, dealbreakers, ageRangeMin, ageRangeMax, maxDistance,
   } = body
 
-  if (age !== undefined && (typeof age !== 'number' || age < 18 || age > 120)) {
-    return NextResponse.json({ error: 'Age must be between 18 and 120' }, { status: 400 })
+  if (age !== undefined && typeof age !== 'number') {
+    return NextResponse.json({ error: 'Age must be a number' }, { status: 400 })
   }
 
   const updateData: Record<string, any> = {}

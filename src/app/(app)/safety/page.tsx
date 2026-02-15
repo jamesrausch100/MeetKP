@@ -7,7 +7,7 @@ import {
   AlertTriangle,
   CheckCircle,
   UserX,
-  Camera,
+  Link2,
   Loader2,
 } from 'lucide-react'
 import DatePlanCard from '@/components/DatePlanCard'
@@ -38,15 +38,15 @@ interface ProfileData {
   verificationPhoto: string
 }
 
-const SAFETY_TIPS = [
-  'Always meet in a public place for the first few dates',
-  'Tell a friend or family member where you are going and who you are meeting',
-  'Trust your gut — if something feels off, leave',
-  'Do a video call before meeting in person to verify who they are',
-  'Never share your home address until you feel comfortable',
-  'Keep your phone charged and have your own transportation',
-  'Do not share financial information or send money to anyone',
-  'Report any suspicious behavior immediately',
+const TRUST_GUIDELINES = [
+  'Always test partnerships in sandbox before production',
+  'Verify agent capabilities before sharing sensitive data',
+  'Monitor collaboration session audit logs regularly',
+  'Report agents that produce hallucinated or fabricated output',
+  'Use structured input/output schemas for reliable partnerships',
+  'Start with small tasks before scaling up collaboration',
+  'Keep API keys and credentials out of collaboration channels',
+  'Review partner agent version changes that may affect compatibility',
 ]
 
 export default function SafetyPage() {
@@ -124,7 +124,7 @@ export default function SafetyPage() {
         )
       }
     } catch (err) {
-      console.error('Failed to update date plan:', err)
+      console.error('Failed to update collaboration session:', err)
     }
   }
 
@@ -162,15 +162,17 @@ export default function SafetyPage() {
             <Shield className="w-6 h-6 text-kp-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold font-display">Your Safety Matters</h1>
-            <p className="text-sm text-kp-muted">Tools to keep you safe while dating</p>
+            <h1 className="text-2xl font-bold font-display">Agent Trust Center</h1>
+            <p className="text-sm text-kp-muted">
+              Monitor your agent&apos;s trust score, partnerships, and audit trail.
+            </p>
           </div>
         </div>
 
         {/* Section 1: Verification */}
         <section className="mb-8">
           <h2 className="text-lg font-bold font-display mb-4 flex items-center gap-2">
-            <Camera className="w-5 h-5 text-kp-accent" />
+            <Link2 className="w-5 h-5 text-kp-accent" />
             Verification
           </h2>
 
@@ -181,9 +183,9 @@ export default function SafetyPage() {
                   <CheckCircle className="w-5 h-5 text-green-400" />
                 </div>
                 <div>
-                  <p className="font-semibold text-green-400">Profile Verified</p>
+                  <p className="font-semibold text-green-400">Your agent is capability-verified</p>
                   <p className="text-sm text-kp-muted">
-                    Your identity has been confirmed. You get 3x more matches!
+                    Verified agents get 3x more partnership requests.
                   </p>
                 </div>
               </div>
@@ -198,7 +200,7 @@ export default function SafetyPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-green-400">Verification Complete!</p>
-                  <p className="text-sm text-kp-muted">Your profile is now verified.</p>
+                  <p className="text-sm text-kp-muted">Your agent is now capability-verified.</p>
                 </div>
               </motion.div>
             ) : (
@@ -208,20 +210,20 @@ export default function SafetyPage() {
                   <div>
                     <p className="font-medium">Not yet verified</p>
                     <p className="text-sm text-kp-muted mt-1">
-                      Submit a selfie to verify your identity. Verified profiles get{' '}
-                      <span className="text-kp-accent font-semibold">3x more matches</span>!
+                      Submit an API endpoint or capability test URL for verification. Verified agents get{' '}
+                      <span className="text-kp-accent font-semibold">3x more partnership requests</span>.
                     </p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-sm text-kp-muted mb-1 block">Selfie URL</label>
+                  <label className="text-sm text-kp-muted mb-1 block">API Endpoint or Capability Test URL</label>
                   <input
                     type="url"
                     value={verificationUrl}
                     onChange={(e) => setVerificationUrl(e.target.value)}
                     className="input-field"
-                    placeholder="https://example.com/my-selfie.jpg"
+                    placeholder="https://api.example.com/agent/capabilities"
                   />
                 </div>
 
@@ -237,7 +239,7 @@ export default function SafetyPage() {
                     </>
                   ) : (
                     <>
-                      <Camera className="w-4 h-4" />
+                      <Link2 className="w-4 h-4" />
                       Submit for Verification
                     </>
                   )}
@@ -247,18 +249,18 @@ export default function SafetyPage() {
           </div>
         </section>
 
-        {/* Section 2: Upcoming Dates */}
+        {/* Section 2: Active Partnerships */}
         <section className="mb-8">
           <h2 className="text-lg font-bold font-display mb-4 flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-kp-accent" />
-            Upcoming Dates
+            Active Partnerships
           </h2>
 
           {datePlans.length === 0 ? (
             <div className="card p-5 text-center">
-              <p className="text-kp-muted">No date plans yet.</p>
+              <p className="text-kp-muted">No collaboration sessions yet.</p>
               <p className="text-sm text-kp-muted mt-1">
-                When you plan a date with a match, it will appear here.
+                When you start a collaboration session with a partner agent, it will appear here.
               </p>
             </div>
           ) : (
@@ -275,18 +277,18 @@ export default function SafetyPage() {
           )}
         </section>
 
-        {/* Section 3: Blocked Users */}
+        {/* Section 3: Blocked Agents */}
         <section className="mb-8">
           <h2 className="text-lg font-bold font-display mb-4 flex items-center gap-2">
             <UserX className="w-5 h-5 text-kp-accent" />
-            Blocked Users
+            Blocked Agents
           </h2>
 
           {blockedUsers.length === 0 ? (
             <div className="card p-5 text-center">
-              <p className="text-kp-muted">No blocked users.</p>
+              <p className="text-kp-muted">You haven&apos;t blocked any agents.</p>
               <p className="text-sm text-kp-muted mt-1">
-                Users you block will no longer be able to see or message you.
+                Agents you block will no longer be able to discover or message your agent.
               </p>
             </div>
           ) : (
@@ -319,16 +321,16 @@ export default function SafetyPage() {
           )}
         </section>
 
-        {/* Section 4: Safety Tips */}
+        {/* Section 4: Trust Guidelines */}
         <section className="mb-8">
           <h2 className="text-lg font-bold font-display mb-4 flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-kp-accent" />
-            Safety Tips
+            Trust Guidelines
           </h2>
 
           <div className="card p-5">
             <ul className="space-y-3">
-              {SAFETY_TIPS.map((tip, index) => (
+              {TRUST_GUIDELINES.map((tip, index) => (
                 <li key={index} className="flex items-start gap-3 text-sm">
                   <Shield className="w-4 h-4 text-kp-primary mt-0.5 shrink-0" />
                   <span className="text-white/80">{tip}</span>
