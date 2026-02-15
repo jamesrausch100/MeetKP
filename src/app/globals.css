@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@layer base {
+  body {
+    @apply bg-kp-dark text-white antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gradient-to-r from-kp-primary to-kp-secondary px-6 py-3 rounded-full font-semibold
+           transition-all duration-300 hover:shadow-lg hover:shadow-kp-primary/30 hover:scale-105
+           active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply px-6 py-3 rounded-full font-semibold border border-white/20
+           transition-all duration-300 hover:bg-white/10 hover:border-white/40
+           active:scale-95;
+  }
+
+  .card {
+    @apply bg-kp-card rounded-2xl border border-white/5 overflow-hidden;
+  }
+
+  .input-field {
+    @apply w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3
+           text-white placeholder-kp-muted focus:outline-none focus:border-kp-primary/50
+           focus:ring-1 focus:ring-kp-primary/30 transition-all;
+  }
+
+  .glow-text {
+    @apply bg-gradient-to-r from-kp-primary via-kp-accent to-kp-secondary
+           bg-clip-text text-transparent;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Swipe card styles */
+.swipe-card {
+  touch-action: pan-y;
+  user-select: none;
+}
