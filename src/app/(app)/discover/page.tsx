@@ -33,6 +33,8 @@ interface Profile {
   personalityTags: string[]
   compatibilityScore?: number
   promptAnswers?: { prompt: string; answer: string }[]
+  distance?: number | null
+  isOnline?: boolean
 }
 
 interface SwipeResponse {
@@ -392,11 +394,17 @@ function ProfileCard({
           {profile.name}, {profile.age}
         </h2>
 
-        {/* Location */}
+        {/* Location + distance */}
         {profile.location && (
           <div className="flex items-center gap-1 text-kp-muted text-sm mt-1">
             <MapPin className="w-3.5 h-3.5" />
             <span>{profile.location}</span>
+            {profile.distance != null && (
+              <span className="text-white/40 ml-1">· {profile.distance} mi</span>
+            )}
+            {profile.isOnline && (
+              <span className="ml-1 w-2 h-2 rounded-full bg-green-400 inline-block" title="Online now" />
+            )}
           </div>
         )}
 

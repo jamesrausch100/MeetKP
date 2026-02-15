@@ -16,7 +16,6 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Fetch current user's profile
   const currentProfile = await prisma.profile.findUnique({
     where: { userId },
   })
@@ -28,14 +27,12 @@ export async function GET() {
     )
   }
 
-  // Get IDs of users the current user has already swiped on
-  const swipedUserIds = await prisma.swipe.findMany({
-    where: { fromUserId: userId },
-    select: { toUserId: true },
-  })
-
-  // Get IDs of blocked users (both directions)
-  const [blockedByMe, blockedMe] = await Promise.all([
+  // Get IDs to exclude (already swiped + blocked)
+  const [swipedUserIds, blockedByMe, blockedMe] = await Promise.all([
+    prisma.swipe.findMany({
+      where: { fromUserId: userId },
+      select: { toUserId: true },
+    }),
     prisma.block.findMany({
       where: { blockerId: userId },
       select: { blockedId: true },
@@ -47,31 +44,32 @@ export async function GET() {
   ])
 
   const excludedIds = [
-    userId,
-    ...swipedUserIds.map((s) => s.toUserId),
-    ...blockedByMe.map((b) => b.blockedId),
-    ...blockedMe.map((b) => b.blockerId),
+    ...new Set([
+      userId,
+      ...swipedUserIds.map((s) => s.toUserId),
+      ...blockedByMe.map((b) => b.blockedId),
+      ...blockedMe.map((b) => b.blockerId),
+    ]),
   ]
 
-  // Remove duplicates
-  const uniqueExcludedIds = [...new Set(excludedIds)]
-
-  // Fetch candidate profiles
+  // Fetch ALL active candidates (no distance filter at query level)
   const candidates = await prisma.profile.findMany({
     where: {
-      userId: { notIn: uniqueExcludedIds },
+      userId: { notIn: excludedIds },
       active: true,
     },
     include: {
       user: {
-        select: { id: true },
+        select: { id: true, lastActive: true, isOnline: true },
       },
     },
   })
 
-  // Parse current user's profile data
+  // Parse current user's profile
   const currentInterests = JSON.parse(currentProfile.interests) as string[]
-  const currentPersonalityTags = JSON.parse(currentProfile.personalityTags) as string[]
+  const currentPersonalityTags = JSON.parse(
+    currentProfile.personalityTags
+  ) as string[]
 
   const currentMatchProfile: MatchProfile = {
     interests: currentInterests,
@@ -85,77 +83,105 @@ export async function GET() {
     lookingFor: currentProfile.lookingFor,
   }
 
-  // Score, filter, and sort candidates
-  const scoredCandidates = candidates
-    .map((candidate) => {
-      const candidateInterests = JSON.parse(candidate.interests) as string[]
-      const candidatePersonalityTags = JSON.parse(candidate.personalityTags) as string[]
+  const hasLocation =
+    currentProfile.latitude != null && currentProfile.longitude != null
 
-      const candidateMatchProfile: MatchProfile = {
-        interests: candidateInterests,
-        personalityTags: candidatePersonalityTags,
-        latitude: candidate.latitude,
-        longitude: candidate.longitude,
-        age: candidate.age,
-        ageRangeMin: candidate.ageRangeMin,
-        ageRangeMax: candidate.ageRangeMax,
-        gender: candidate.gender,
-        lookingFor: candidate.lookingFor,
-      }
+  // Score all candidates
+  const scoredCandidates = candidates.map((candidate) => {
+    const candidateInterests = JSON.parse(candidate.interests) as string[]
+    const candidatePersonalityTags = JSON.parse(
+      candidate.personalityTags
+    ) as string[]
 
-      const compatibilityScore = calculateCompatibility(
-        currentMatchProfile,
-        candidateMatchProfile
+    const candidateMatchProfile: MatchProfile = {
+      interests: candidateInterests,
+      personalityTags: candidatePersonalityTags,
+      latitude: candidate.latitude,
+      longitude: candidate.longitude,
+      age: candidate.age,
+      ageRangeMin: candidate.ageRangeMin,
+      ageRangeMax: candidate.ageRangeMax,
+      gender: candidate.gender,
+      lookingFor: candidate.lookingFor,
+    }
+
+    const compatibilityScore = calculateCompatibility(
+      currentMatchProfile,
+      candidateMatchProfile
+    )
+
+    // Calculate distance if both have coords
+    let distance: number | null = null
+    if (
+      hasLocation &&
+      candidate.latitude != null &&
+      candidate.longitude != null
+    ) {
+      distance = haversineDistance(
+        currentProfile.latitude!,
+        currentProfile.longitude!,
+        candidate.latitude,
+        candidate.longitude
       )
+    }
 
-      return {
-        profile: candidate,
-        interests: candidateInterests,
-        photos: JSON.parse(candidate.photos),
-        compatibilityScore,
-      }
-    })
-    .filter((candidate) => {
-      // Filter by current user's age range preferences
-      if (
-        candidate.profile.age < currentProfile.ageRangeMin ||
-        candidate.profile.age > currentProfile.ageRangeMax
-      ) {
-        return false
-      }
+    return {
+      profile: candidate,
+      interests: candidateInterests,
+      personalityTags: candidatePersonalityTags,
+      promptAnswers: JSON.parse(candidate.promptAnswers || '[]'),
+      photos: JSON.parse(candidate.photos),
+      compatibilityScore,
+      distance,
+    }
+  })
 
-      // Filter by distance if current user has location
-      if (
-        currentProfile.latitude != null &&
-        currentProfile.longitude != null &&
-        candidate.profile.latitude != null &&
-        candidate.profile.longitude != null
-      ) {
-        const distance = haversineDistance(
-          currentProfile.latitude,
-          currentProfile.longitude,
-          candidate.profile.latitude,
-          candidate.profile.longitude
-        )
-        if (distance > currentProfile.maxDistance) {
-          return false
-        }
-      }
+  // Apply soft filters: try strict first, then loosen if no results
+  let filtered = scoredCandidates.filter((c) => {
+    // Age range filter
+    if (
+      c.profile.age < currentProfile.ageRangeMin ||
+      c.profile.age > currentProfile.ageRangeMax
+    ) {
+      return false
+    }
+    // Distance filter (only if both have location)
+    if (c.distance != null && c.distance > currentProfile.maxDistance) {
+      return false
+    }
+    return true
+  })
 
-      return true
-    })
-    // Sort by compatibility score (highest first)
-    .sort((a, b) => b.compatibilityScore - a.compatibilityScore)
-    // Limit to 20 results
-    .slice(0, 20)
+  // FALLBACK: If strict filtering returned nothing, show EVERYONE
+  // This ensures users always see profiles regardless of location
+  if (filtered.length === 0) {
+    filtered = scoredCandidates
+  }
 
-  const result = scoredCandidates.map((candidate) => ({
-    ...candidate.profile,
-    interests: candidate.interests,
-    photos: candidate.photos,
+  // Sort by compatibility score (highest first)
+  filtered.sort((a, b) => b.compatibilityScore - a.compatibilityScore)
+
+  // Limit to 50 results
+  const limited = filtered.slice(0, 50)
+
+  const result = limited.map((candidate) => ({
+    id: candidate.profile.id,
     userId: candidate.profile.user.id,
-    user: undefined,
+    name: candidate.profile.name,
+    age: candidate.profile.age,
+    bio: candidate.profile.bio,
+    location: candidate.profile.location,
+    vibe: candidate.profile.vibe,
+    gender: candidate.profile.gender,
+    interests: candidate.interests,
+    personalityTags: candidate.personalityTags,
+    promptAnswers: candidate.promptAnswers,
+    photos: candidate.photos,
+    photoVerified: candidate.profile.photoVerified,
     compatibilityScore: candidate.compatibilityScore,
+    distance: candidate.distance != null ? Math.round(candidate.distance) : null,
+    isOnline: candidate.profile.user.isOnline,
+    lastActive: candidate.profile.user.lastActive,
   }))
 
   return NextResponse.json(result)

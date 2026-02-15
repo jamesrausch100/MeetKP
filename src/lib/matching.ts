@@ -132,7 +132,9 @@ function calculateLocationScore(
     profileB.latitude == null ||
     profileB.longitude == null
   ) {
-    return 0
+    // Give partial location credit when coords aren't set
+    // so profiles without GPS still appear with decent scores
+    return 10
   }
 
   const distance = haversineDistance(
