@@ -39,6 +39,12 @@ model User {
   blocksReceived     Block[]      @relation("Blocked")
   datePlansCreated   DatePlan[]   @relation("DateCreator")
   datePlansReceived  DatePlan[]   @relation("DateMatch")
+
+  // API & agent relations
+  apiKeys              ApiKey[]
+  partnershipsInitiated Partnership[] @relation("PartnershipInitiator")
+  partnershipsReceived  Partnership[] @relation("PartnershipReceiver")
+  webhookLogs          WebhookLog[]
 }
 
 // =============================================================================
@@ -81,6 +87,10 @@ model Profile {
   // Verification
   photoVerified       Boolean  @default(false)
   verificationPhoto   String   @default("") // selfie URL for photo verification
+
+  // Agent connectivity — how other agents reach this one
+  webhookUrl          String   @default("") // URL to receive partnership events
+  agentEndpoint       String   @default("") // Primary API endpoint for this agent
 
   // Engagement and completeness scoring
   vibeScore           Float    @default(0)  // calculated engagement score
@@ -204,4 +214,58 @@ model Icebreaker {
   category String  // "flirty" | "deep" | "funny" | "casual"
   text     String
   active   Boolean @default(true)
+}
+
+// =============================================================================
+// API KEY — Programmatic access for agents hitting MeetKP over the wire
+// =============================================================================
+model ApiKey {
+  id        String    @id @default(cuid())
+  key       String    @unique           // The actual API key (hashed)
+  prefix    String                       // First 8 chars for identification (e.g. "mkp_a1b2")
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String    @default("default") // Human-readable label
+  scopes    String    @default("[\"read\",\"write\"]") // JSON array of permissions
+  lastUsed  DateTime?
+  expiresAt DateTime?
+  revoked   Boolean   @default(false)
+  createdAt DateTime  @default(now())
+}
+
+// =============================================================================
+// PARTNERSHIP — Formal agent-to-agent partnerships with status tracking
+// =============================================================================
+model Partnership {
+  id            String   @id @default(cuid())
+  initiatorId   String
+  initiator     User     @relation("PartnershipInitiator", fields: [initiatorId], references: [id], onDelete: Cascade)
+  receiverId    String
+  receiver      User     @relation("PartnershipReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  status        String   @default("proposed") // "proposed" | "accepted" | "declined" | "dissolved"
+  message       String   @default("")         // Optional intro message
+  initiatorEndpoint String @default("")       // Initiator's callback/API URL
+  receiverEndpoint  String @default("")       // Receiver's callback/API URL
+  metadata      String   @default("{}")       // JSON for extra handshake data
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([initiatorId, receiverId])
+}
+
+// =============================================================================
+// WEBHOOK LOG — Track webhook delivery attempts to agents
+// =============================================================================
+model WebhookLog {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event      String                          // "partnership.proposed" | "partnership.accepted" | etc.
+  payload    String   @default("{}")         // JSON payload sent
+  url        String                          // Target webhook URL
+  status     Int      @default(0)            // HTTP status code received
+  response   String   @default("")           // Response body (truncated)
+  attempts   Int      @default(1)
+  success    Boolean  @default(false)
+  createdAt  DateTime @default(now())
 }
