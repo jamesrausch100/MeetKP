@@ -10,6 +10,11 @@ import {
   Loader2,
   Sparkles,
   MessageCircle,
+  Shield,
+  Zap,
+  ChevronDown,
+  SlidersHorizontal,
+  Flag,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -24,6 +29,10 @@ interface Profile {
   interests: string[]
   photos: string[]
   gender: string
+  photoVerified: boolean
+  personalityTags: string[]
+  compatibilityScore?: number
+  promptAnswers?: { prompt: string; answer: string }[]
 }
 
 interface SwipeResponse {
@@ -38,6 +47,8 @@ export default function DiscoverPage() {
   const [swiping, setSwiping] = useState(false)
   const [swipeDirection, setSwipeDirection] = useState<string | null>(null)
   const [matchOverlay, setMatchOverlay] = useState<Profile | null>(null)
+  const [icebreakers, setIcebreakers] = useState<string[]>([])
+  const [expanded, setExpanded] = useState(false)
 
   const fetchProfiles = useCallback(async () => {
     try {
@@ -60,10 +71,23 @@ export default function DiscoverPage() {
   const currentProfile = profiles[currentIndex]
   const hasMore = currentIndex < profiles.length
 
+  const fetchIcebreakers = async (matchUserId: string) => {
+    try {
+      const res = await fetch(`/api/icebreakers/suggest?matchUserId=${matchUserId}`)
+      if (res.ok) {
+        const data = await res.json()
+        setIcebreakers(data.suggestions?.map((s: any) => s.text) || [])
+      }
+    } catch {
+      setIcebreakers([])
+    }
+  }
+
   const handleSwipe = async (direction: 'like' | 'pass' | 'superlike') => {
     if (swiping || !currentProfile) return
     setSwiping(true)
     setSwipeDirection(direction)
+    setExpanded(false)
 
     try {
       const res = await fetch('/api/swipe', {
@@ -78,7 +102,7 @@ export default function DiscoverPage() {
       if (res.ok) {
         const data: SwipeResponse = await res.json()
         if (data.matched) {
-          // Wait for exit animation, then show match overlay
+          fetchIcebreakers(currentProfile.userId)
           setTimeout(() => {
             setMatchOverlay(data.matchedProfile ?? currentProfile)
           }, 400)
@@ -88,7 +112,6 @@ export default function DiscoverPage() {
       // silently fail
     }
 
-    // Move to next profile after animation
     setTimeout(() => {
       setCurrentIndex((prev) => prev + 1)
       setSwipeDirection(null)
@@ -115,7 +138,7 @@ export default function DiscoverPage() {
   }
 
   return (
-    <div className="flex flex-col items-center px-4 py-6 max-w-lg mx-auto">
+    <div className="flex flex-col items-center px-4 py-4 max-w-lg mx-auto">
       {/* Match Overlay */}
       <AnimatePresence>
         {matchOverlay && (
@@ -123,52 +146,81 @@ export default function DiscoverPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ type: 'spring', damping: 20 }}
-              className="card p-8 text-center max-w-sm w-full"
+              className="card p-8 text-center max-w-sm w-full relative overflow-hidden"
             >
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 0.6, repeat: 2 }}
-              >
-                <Heart className="w-16 h-16 text-kp-primary mx-auto mb-4 fill-kp-primary" />
-              </motion.div>
-              <h2 className="font-display text-3xl font-bold glow-text mb-2">
-                It&apos;s a Match!
-              </h2>
-              <p className="text-kp-muted mb-6">
-                You and {matchOverlay.name} liked each other
-              </p>
+              {/* Background glow */}
+              <div className="absolute inset-0 bg-gradient-to-b from-kp-primary/10 to-transparent" />
 
-              {matchOverlay.photos?.[0] && (
-                <div className="w-24 h-24 rounded-full mx-auto mb-6 overflow-hidden border-2 border-kp-primary">
-                  <img
-                    src={matchOverlay.photos[0]}
-                    alt={matchOverlay.name}
-                    className="w-full h-full object-cover"
-                  />
+              <div className="relative z-10">
+                <motion.div
+                  animate={{ scale: [1, 1.3, 1] }}
+                  transition={{ duration: 0.8, repeat: 2 }}
+                >
+                  <Heart className="w-16 h-16 text-kp-primary mx-auto mb-4 fill-kp-primary" />
+                </motion.div>
+
+                <h2 className="font-display text-3xl font-bold glow-text mb-2">
+                  It&apos;s a Match!
+                </h2>
+                <p className="text-kp-muted mb-6">
+                  You and {matchOverlay.name} liked each other
+                </p>
+
+                {matchOverlay.photos?.[0] ? (
+                  <div className="w-24 h-24 rounded-full mx-auto mb-6 overflow-hidden border-2 border-kp-primary">
+                    <img src={matchOverlay.photos[0]} alt={matchOverlay.name} className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 rounded-full mx-auto mb-6 bg-gradient-to-br from-kp-primary/30 to-kp-secondary/30 flex items-center justify-center border-2 border-kp-primary">
+                    <span className="text-3xl font-bold">{matchOverlay.name[0]}</span>
+                  </div>
+                )}
+
+                {matchOverlay.compatibilityScore && (
+                  <div className="inline-flex items-center gap-1.5 bg-kp-primary/10 border border-kp-primary/20 rounded-full px-3 py-1 mb-6">
+                    <Sparkles className="w-3.5 h-3.5 text-kp-primary" />
+                    <span className="text-sm font-semibold text-kp-primary">{matchOverlay.compatibilityScore}% compatible</span>
+                  </div>
+                )}
+
+                {/* Icebreaker suggestions */}
+                {icebreakers.length > 0 && (
+                  <div className="mb-6">
+                    <p className="text-xs text-kp-muted mb-2 flex items-center justify-center gap-1">
+                      <Zap className="w-3 h-3" /> Try an icebreaker
+                    </p>
+                    <div className="space-y-2">
+                      {icebreakers.slice(0, 2).map((ib, i) => (
+                        <p key={i} className="text-sm text-white/80 bg-white/5 rounded-lg px-3 py-2 italic">
+                          &ldquo;{ib}&rdquo;
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <Link
+                    href={`/messages/${matchOverlay.userId}`}
+                    className="btn-primary flex-1 flex items-center justify-center gap-2"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Message
+                  </Link>
+                  <button
+                    onClick={() => { setMatchOverlay(null); setIcebreakers([]) }}
+                    className="btn-ghost flex-1"
+                  >
+                    Keep Swiping
+                  </button>
                 </div>
-              )}
-
-              <div className="flex gap-3">
-                <Link
-                  href={`/messages/${matchOverlay.userId}`}
-                  className="btn-primary flex-1 flex items-center justify-center gap-2"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  Send Message
-                </Link>
-                <button
-                  onClick={() => setMatchOverlay(null)}
-                  className="btn-ghost flex-1"
-                >
-                  Keep Swiping
-                </button>
               </div>
             </motion.div>
           </motion.div>
@@ -189,23 +241,26 @@ export default function DiscoverPage() {
             <h3 className="font-display text-xl font-semibold mb-2">
               You&apos;ve seen everyone nearby
             </h3>
-            <p className="text-kp-muted">
-              Check back later. New people join every day.
+            <p className="text-kp-muted mb-6">
+              Check back later — new people join every day.
             </p>
+            <Link href="/invite" className="btn-primary text-sm">
+              Invite friends to grow your circle
+            </Link>
           </motion.div>
         ) : (
           <AnimatePresence mode="popLayout">
-            {/* Show next card behind (static) */}
+            {/* Next card behind */}
             {currentIndex + 1 < profiles.length && (
               <div
                 key={profiles[currentIndex + 1].id + '-bg'}
-                className="absolute inset-0 scale-[0.95] opacity-50"
+                className="absolute inset-0 scale-[0.95] opacity-40"
               >
                 <ProfileCard profile={profiles[currentIndex + 1]} />
               </div>
             )}
 
-            {/* Current card (animated) */}
+            {/* Current card */}
             {currentProfile && (
               <motion.div
                 key={currentProfile.id}
@@ -215,7 +270,11 @@ export default function DiscoverPage() {
                 transition={{ duration: 0.35, ease: 'easeOut' }}
                 className="absolute inset-0"
               >
-                <ProfileCard profile={currentProfile} />
+                <ProfileCard
+                  profile={currentProfile}
+                  expanded={expanded}
+                  onToggleExpand={() => setExpanded(!expanded)}
+                />
               </motion.div>
             )}
           </AnimatePresence>
@@ -223,12 +282,12 @@ export default function DiscoverPage() {
       </div>
 
       {/* Action Buttons */}
-      {hasMore && (
+      {hasMore && currentProfile && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="flex items-center gap-5 mt-6"
+          className="flex items-center gap-4 mt-4"
         >
           <button
             onClick={() => handleSwipe('pass')}
@@ -242,51 +301,89 @@ export default function DiscoverPage() {
           <button
             onClick={() => handleSwipe('superlike')}
             disabled={swiping}
-            className="w-14 h-14 rounded-full bg-kp-card border border-white/10 flex items-center justify-center
+            className="w-12 h-12 rounded-full bg-kp-card border border-white/10 flex items-center justify-center
                        hover:bg-yellow-500/10 hover:border-yellow-500/30 transition-all active:scale-90 disabled:opacity-50"
           >
-            <Star className="w-6 h-6 text-yellow-400" />
+            <Star className="w-5 h-5 text-yellow-400" />
           </button>
 
           <button
             onClick={() => handleSwipe('like')}
             disabled={swiping}
-            className="w-16 h-16 rounded-full bg-kp-card border border-white/10 flex items-center justify-center
-                       hover:bg-green-500/10 hover:border-green-500/30 transition-all active:scale-90 disabled:opacity-50"
+            className="w-16 h-16 rounded-full bg-gradient-to-br from-kp-primary to-kp-primary/80 border border-kp-primary/30 flex items-center justify-center
+                       hover:shadow-lg hover:shadow-kp-primary/30 transition-all active:scale-90 disabled:opacity-50"
           >
-            <Heart className="w-7 h-7 text-green-400" />
+            <Heart className="w-7 h-7 text-white" />
           </button>
+        </motion.div>
+      )}
+
+      {/* Compatibility Score */}
+      {hasMore && currentProfile?.compatibilityScore && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex items-center gap-2 mt-3"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-kp-primary" />
+          <span className="text-sm text-kp-muted">
+            <span className="text-kp-primary font-semibold">{currentProfile.compatibilityScore}%</span> compatible
+          </span>
         </motion.div>
       )}
     </div>
   )
 }
 
-function ProfileCard({ profile }: { profile: Profile }) {
+function ProfileCard({
+  profile,
+  expanded = false,
+  onToggleExpand,
+}: {
+  profile: Profile
+  expanded?: boolean
+  onToggleExpand?: () => void
+}) {
   const mainPhoto = profile.photos?.[0]
 
   return (
-    <div className="relative w-full h-full rounded-2xl overflow-hidden card">
+    <div className="relative w-full h-full rounded-2xl overflow-hidden card swipe-card">
       {/* Photo or gradient placeholder */}
       {mainPhoto ? (
-        <img
-          src={mainPhoto}
-          alt={profile.name}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+        <img src={mainPhoto} alt={profile.name} className="absolute inset-0 w-full h-full object-cover" />
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-kp-primary/30 via-kp-card to-kp-secondary/30" />
+        <div className="absolute inset-0 bg-gradient-to-br from-kp-primary/20 via-kp-card to-kp-secondary/20">
+          <div className="absolute inset-0 flex items-center justify-center opacity-20">
+            <span className="text-[120px] font-bold font-display">{profile.name[0]}</span>
+          </div>
+        </div>
       )}
 
-      {/* Gradient overlay for text readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
+
+      {/* Verified badge */}
+      {profile.photoVerified && (
+        <div className="absolute top-4 right-4 bg-green-500/20 border border-green-500/30 rounded-full px-2.5 py-1 flex items-center gap-1">
+          <Shield className="w-3 h-3 text-green-400" />
+          <span className="text-[10px] text-green-400 font-semibold">Verified</span>
+        </div>
+      )}
+
+      {/* Compatibility badge */}
+      {profile.compatibilityScore && (
+        <div className="absolute top-4 left-4 bg-kp-primary/20 border border-kp-primary/30 rounded-full px-2.5 py-1 flex items-center gap-1">
+          <Sparkles className="w-3 h-3 text-kp-primary" />
+          <span className="text-[10px] text-kp-primary font-semibold">{profile.compatibilityScore}%</span>
+        </div>
+      )}
 
       {/* Content */}
-      <div className="absolute bottom-0 left-0 right-0 p-6">
+      <div className="absolute bottom-0 left-0 right-0 p-5">
         {/* Vibe tagline */}
         {profile.vibe && (
-          <p className="text-kp-accent text-sm font-medium mb-1 truncate">
-            {profile.vibe}
+          <p className="text-kp-accent text-sm font-medium mb-1 truncate italic">
+            &ldquo;{profile.vibe}&rdquo;
           </p>
         )}
 
@@ -303,30 +400,63 @@ function ProfileCard({ profile }: { profile: Profile }) {
           </div>
         )}
 
+        {/* Personality Tags */}
+        {profile.personalityTags && profile.personalityTags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {profile.personalityTags.slice(0, 3).map((tag, i) => (
+              <span key={i} className="px-2 py-0.5 text-[10px] rounded-full bg-kp-secondary/15 text-kp-secondary border border-kp-secondary/20 font-medium">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* Bio preview */}
         {profile.bio && (
-          <p className="text-white/70 text-sm mt-3 line-clamp-2">
-            {profile.bio}
-          </p>
+          <p className="text-white/70 text-sm mt-2.5 line-clamp-2">{profile.bio}</p>
+        )}
+
+        {/* Prompt answers */}
+        {expanded && profile.promptAnswers && profile.promptAnswers.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="mt-3 space-y-2"
+          >
+            {profile.promptAnswers.slice(0, 2).map((pa, i) => (
+              <div key={i} className="bg-white/5 rounded-lg p-2.5">
+                <p className="text-[10px] text-kp-muted font-medium mb-0.5">{pa.prompt}</p>
+                <p className="text-sm text-white/80">{pa.answer}</p>
+              </div>
+            ))}
+          </motion.div>
         )}
 
         {/* Interest tags */}
         {profile.interests && profile.interests.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-3">
-            {profile.interests.slice(0, 5).map((tag, i) => (
-              <span
-                key={i}
-                className="px-2.5 py-0.5 text-xs rounded-full bg-white/10 text-white/80 border border-white/10"
-              >
+          <div className="flex flex-wrap gap-1.5 mt-2.5">
+            {profile.interests.slice(0, 4).map((tag, i) => (
+              <span key={i} className="px-2.5 py-0.5 text-xs rounded-full bg-white/10 text-white/80 border border-white/10">
                 {tag}
               </span>
             ))}
-            {profile.interests.length > 5 && (
+            {profile.interests.length > 4 && (
               <span className="px-2.5 py-0.5 text-xs rounded-full bg-white/10 text-white/50">
-                +{profile.interests.length - 5}
+                +{profile.interests.length - 4}
               </span>
             )}
           </div>
+        )}
+
+        {/* Expand toggle */}
+        {onToggleExpand && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggleExpand() }}
+            className="mt-2 flex items-center gap-1 text-kp-muted hover:text-white text-xs transition"
+          >
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+            {expanded ? 'Less' : 'More about ' + profile.name}
+          </button>
         )}
       </div>
     </div>

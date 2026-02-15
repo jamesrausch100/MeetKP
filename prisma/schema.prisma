@@ -7,57 +7,201 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// =============================================================================
+// USER — Core authentication and identity
+// =============================================================================
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
+  googleId      String?   @unique // OAuth Google ID for social login
   passwordHash  String
+  lastActive    DateTime  @default(now())
+  isOnline      Boolean   @default(false)
+  role          String    @default("user") // "user" | "admin" | "moderator"
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  profile       Profile?
-  sentSwipes    Swipe[]   @relation("SentSwipes")
-  receivedSwipes Swipe[]  @relation("ReceivedSwipes")
-  sentMessages  Message[] @relation("SentMessages")
+
+  // Existing relations
+  profile          Profile?
+  sentSwipes       Swipe[]   @relation("SentSwipes")
+  receivedSwipes   Swipe[]   @relation("ReceivedSwipes")
+  sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
+
+  // New relations
+  createdInviteCodes InviteCode[] @relation("InviteCreator")
+  usedInviteCode     InviteCode?  @relation("InviteUser")
+  referralsMade      Referral[]   @relation("Referrer")
+  referralsReceived  Referral[]   @relation("Referred")
+  reportsFiled       Report[]     @relation("Reporter")
+  reportsReceived    Report[]     @relation("Reported")
+  blocksInitiated    Block[]      @relation("Blocker")
+  blocksReceived     Block[]      @relation("Blocked")
+  datePlansCreated   DatePlan[]   @relation("DateCreator")
+  datePlansReceived  DatePlan[]   @relation("DateMatch")
 }
 
+// =============================================================================
+// PROFILE — Extended user profile with preferences and discovery features
+// =============================================================================
 model Profile {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name        String
-  age         Int
-  bio         String   @default("")
-  gender      String   @default("")
-  lookingFor  String   @default("")
-  location    String   @default("")
-  interests   String   @default("[]") // JSON array stored as string
-  photos      String   @default("[]") // JSON array of photo URLs
-  vibe        String   @default("")   // short tagline
-  verified    Boolean  @default(false)
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                String
+  age                 Int
+  bio                 String   @default("")
+  gender              String   @default("")
+  lookingFor          String   @default("")
+  location            String   @default("")
+  interests           String   @default("[]") // JSON array stored as string
+  photos              String   @default("[]") // JSON array of photo URLs
+  vibe                String   @default("")   // short tagline
+  verified            Boolean  @default(false)
+  active              Boolean  @default(true)
+
+  // Geolocation for distance-based discovery
+  latitude            Float?
+  longitude           Float?
+
+  // Fun profile prompts instead of boring bios — JSON array of {prompt, answer}
+  promptAnswers       String   @default("[]")
+
+  // Personality tags — e.g. ["adventurous", "homebody", "night owl"]
+  personalityTags     String   @default("[]")
+
+  // Dealbreakers — things they won't tolerate
+  dealbreakers        String   @default("[]")
+
+  // Preference filters
+  ageRangeMin         Int      @default(18)
+  ageRangeMax         Int      @default(99)
+  maxDistance          Int      @default(50) // miles
+
+  // Verification
+  photoVerified       Boolean  @default(false)
+  verificationPhoto   String   @default("") // selfie URL for photo verification
+
+  // Engagement and completeness scoring
+  vibeScore           Float    @default(0)  // calculated engagement score
+  profileCompleteness Int      @default(0)  // percentage 0-100
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
 
+// =============================================================================
+// SWIPE — Like / pass / superlike actions between users
+// =============================================================================
 model Swipe {
-  id         String   @id @default(cuid())
-  fromUserId String
-  toUserId   String
-  direction  String   // "like" | "pass" | "superlike"
-  createdAt  DateTime @default(now())
-  fromUser   User     @relation("SentSwipes", fields: [fromUserId], references: [id], onDelete: Cascade)
-  toUser     User     @relation("ReceivedSwipes", fields: [toUserId], references: [id], onDelete: Cascade)
+  id                 String   @id @default(cuid())
+  fromUserId         String
+  toUserId           String
+  direction          String   // "like" | "pass" | "superlike"
+  compatibilityScore Float?   // AI-calculated compatibility score at swipe time
+  createdAt          DateTime @default(now())
+  fromUser           User     @relation("SentSwipes", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser             User     @relation("ReceivedSwipes", fields: [toUserId], references: [id], onDelete: Cascade)
 
   @@unique([fromUserId, toUserId])
 }
 
+// =============================================================================
+// MESSAGE — Chat messages between matched users
+// =============================================================================
 model Message {
   id         String   @id @default(cuid())
   fromUserId String
   toUserId   String
   content    String
   read       Boolean  @default(false)
+  type       String   @default("text")  // "text" | "icebreaker" | "date_invite" | "gif"
+  metadata   String   @default("{}")    // JSON for extra data like icebreaker reference
   createdAt  DateTime @default(now())
   fromUser   User     @relation("SentMessages", fields: [fromUserId], references: [id], onDelete: Cascade)
   toUser     User     @relation("ReceivedMessages", fields: [toUserId], references: [id], onDelete: Cascade)
+}
+
+// =============================================================================
+// INVITE CODE — Users can generate invite codes to bring friends to the platform
+// =============================================================================
+model InviteCode {
+  id        String    @id @default(cuid())
+  code      String    @unique
+  creatorId String
+  creator   User      @relation("InviteCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  usedById  String?   @unique
+  usedBy    User?     @relation("InviteUser", fields: [usedById], references: [id], onDelete: SetNull)
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+// =============================================================================
+// REFERRAL — Track who referred whom and reward claims
+// =============================================================================
+model Referral {
+  id            String   @id @default(cuid())
+  referrerId    String
+  referrer      User     @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referredId    String
+  referred      User     @relation("Referred", fields: [referredId], references: [id], onDelete: Cascade)
+  rewardClaimed Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+// =============================================================================
+// REPORT — User safety reports for moderation
+// =============================================================================
+model Report {
+  id         String   @id @default(cuid())
+  reporterId String
+  reporter   User     @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedId String
+  reported   User     @relation("Reported", fields: [reportedId], references: [id], onDelete: Cascade)
+  reason     String   // e.g. "harassment", "fake_profile", "inappropriate_content", "spam"
+  details    String   @default("")
+  status     String   @default("pending") // "pending" | "reviewed" | "resolved" | "dismissed"
+  createdAt  DateTime @default(now())
+}
+
+// =============================================================================
+// BLOCK — Users can block other users to prevent all interaction
+// =============================================================================
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String
+  blocker   User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId String
+  blocked   User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+}
+
+// =============================================================================
+// DATE PLAN — Coordinate real-life meetups with safety features
+// =============================================================================
+model DatePlan {
+  id         String   @id @default(cuid())
+  creatorId  String
+  creator    User     @relation("DateCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  matchId    String
+  match      User     @relation("DateMatch", fields: [matchId], references: [id], onDelete: Cascade)
+  venue      String
+  address    String   @default("")
+  dateTime   DateTime
+  status     String   @default("proposed") // "proposed" | "accepted" | "declined" | "completed" | "cancelled"
+  sharedWith String   @default("[]")       // JSON array of phone numbers/emails to share location with for safety
+  notes      String   @default("")
+  createdAt  DateTime @default(now())
+}
+
+// =============================================================================
+// ICEBREAKER — Curated conversation starters to help matches break the ice
+// =============================================================================
+model Icebreaker {
+  id       String  @id @default(cuid())
+  category String  // "flirty" | "deep" | "funny" | "casual"
+  text     String
+  active   Boolean @default(true)
 }

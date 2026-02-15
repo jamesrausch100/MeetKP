@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs'
 
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json()
+    const { email, password, inviteCode } = await req.json()
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Email and password required' }, { status: 400 })
@@ -24,6 +24,32 @@ export async function POST(req: Request) {
     const user = await prisma.user.create({
       data: { email, passwordHash },
     })
+
+    // Handle invite code if provided
+    if (inviteCode && typeof inviteCode === 'string') {
+      const invite = await prisma.inviteCode.findUnique({
+        where: { code: inviteCode.toUpperCase().trim() },
+      })
+
+      if (invite && !invite.usedById) {
+        // Mark invite code as used
+        await prisma.inviteCode.update({
+          where: { id: invite.id },
+          data: {
+            usedById: user.id,
+            usedAt: new Date(),
+          },
+        })
+
+        // Create referral record
+        await prisma.referral.create({
+          data: {
+            referrerId: invite.creatorId,
+            referredId: user.id,
+          },
+        })
+      }
+    }
 
     return NextResponse.json({ id: user.id, email: user.email }, { status: 201 })
   } catch {
